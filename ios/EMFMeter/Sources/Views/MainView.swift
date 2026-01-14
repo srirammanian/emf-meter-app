@@ -325,7 +325,7 @@ private struct VintageControlPanelView: View {
                 )
 
             // Controls layout
-            HStack(spacing: 30) {
+            HStack(alignment: .top, spacing: 30) {
                 // Sound toggle
                 VintageToggleSwitchView(
                     label: "AUDIO",
@@ -362,17 +362,12 @@ private struct VintageToggleSwitchView: View {
     let action: () -> Void
 
     var body: some View {
-        VStack(spacing: 6) {
-            // Label plate
+        VStack(spacing: 8) {
+            // Label plate - aligned with other controls
             Text(label)
                 .font(.system(size: 10, weight: .bold))
                 .tracking(1)
                 .foregroundColor(Color(hex: "B0B0A0"))
-
-            // ON label at top
-            Text("ON")
-                .font(.system(size: 7, weight: .bold))
-                .foregroundColor(isOn ? onColor : Color(hex: "505045"))
 
             // Toggle switch housing
             Button(action: action) {
@@ -396,18 +391,16 @@ private struct VintageToggleSwitchView: View {
 
                     // Indicator lights (top = ON, bottom = OFF)
                     VStack {
-                        // ON indicator at top
                         Circle()
                             .fill(isOn ? onColor : Color(hex: "2A2A20"))
-                            .frame(width: 5, height: 5)
+                            .frame(width: 6, height: 6)
                             .shadow(color: isOn ? onColor.opacity(0.8) : .clear, radius: 3)
 
                         Spacer()
 
-                        // OFF indicator at bottom
                         Circle()
                             .fill(!isOn ? Color(hex: "C44536") : Color(hex: "2A2A20"))
-                            .frame(width: 5, height: 5)
+                            .frame(width: 6, height: 6)
                             .shadow(color: !isOn ? Color(hex: "C44536").opacity(0.6) : .clear, radius: 3)
                     }
                     .frame(height: 38)
@@ -419,7 +412,6 @@ private struct VintageToggleSwitchView: View {
                             Spacer()
                         }
 
-                        // Lever
                         ZStack {
                             RoundedRectangle(cornerRadius: 2)
                                 .fill(
@@ -435,7 +427,6 @@ private struct VintageToggleSwitchView: View {
                                 )
                                 .frame(width: 24, height: 18)
 
-                            // Lever grip lines
                             VStack(spacing: 2) {
                                 ForEach(0..<3, id: \.self) { _ in
                                     Rectangle()
@@ -456,10 +447,17 @@ private struct VintageToggleSwitchView: View {
             }
             .buttonStyle(.plain)
 
-            // OFF label at bottom
-            Text("OFF")
-                .font(.system(size: 7, weight: .bold))
-                .foregroundColor(!isOn ? Color(hex: "C44536") : Color(hex: "505045"))
+            // Status indicator to match other controls
+            HStack(spacing: 4) {
+                Circle()
+                    .fill(isOn ? onColor : Color(hex: "C44536"))
+                    .frame(width: 6, height: 6)
+                    .shadow(color: (isOn ? onColor : Color(hex: "C44536")).opacity(0.6), radius: 3)
+                Text(isOn ? "ON" : "OFF")
+                    .font(.system(size: 7, weight: .bold))
+                    .foregroundColor(isOn ? onColor : Color(hex: "C44536"))
+            }
+            .frame(height: 10)
         }
     }
 }

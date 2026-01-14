@@ -72,14 +72,14 @@ struct AnalogMeterView: View {
                         .tracking(1.5)
                         .foregroundColor(colors.vintageScale.opacity(0.8))
 
-                    Text("LOS ANGELES, CA")
+                    Text("SAN FRANCISCO, CA")
                         .font(.system(size: size * 0.022, weight: .regular))
                         .tracking(1)
                         .foregroundColor(colors.vintageScale.opacity(0.6))
 
                     Spacer()
                 }
-                .padding(.top, size * 0.08)
+                .padding(.top, size * 0.04)
 
                 // Digital LCD display and unit label below needle
                 VStack(spacing: size * 0.01) {
