@@ -133,7 +133,7 @@ class EMFViewModel: ObservableObject {
         )
         needlePosition = newPosition
 
-        if soundEnabled && displayMode == .analog {
+        if soundEnabled {
             audioService.playClickIfNeeded(normalizedValue: reading.normalizedValue)
         }
     }
@@ -169,6 +169,7 @@ class EMFViewModel: ObservableObject {
     }
 
     func toggleSound() {
+        audioService.playSwitch()
         soundEnabled.toggle()
         audioService.isEnabled = soundEnabled
         UserDefaults.standard.set(soundEnabled, forKey: EMFViewModelKeys.soundEnabled)

@@ -1,13 +1,16 @@
 import Foundation
 import AVFoundation
 
-/// Service for playing Geiger counter click sounds.
+/// Service for playing Geiger counter click sounds and UI sounds.
 /// Uses a pool of audio players to support rapid overlapping clicks.
 class AudioService: ObservableObject {
     private var audioPlayers: [AVAudioPlayer] = []
     private var currentPlayerIndex: Int = 0
     private var lastClickTime: Date = .distantPast
     private let playerPoolSize = 4  // Pool of players for overlapping sounds
+
+    // Switch sound player (for UI feedback)
+    private var switchPlayer: AVAudioPlayer?
 
     @Published var isEnabled: Bool = true {
         didSet {
@@ -19,6 +22,7 @@ class AudioService: ObservableObject {
 
     init() {
         setupAudio()
+        setupSwitchSound()
     }
 
     private func setupAudio() {
@@ -41,6 +45,27 @@ class AudioService: ObservableObject {
         } catch {
             print("Audio setup failed: \(error)")
         }
+    }
+
+    private func setupSwitchSound() {
+        guard let url = Bundle.main.url(forResource: "switch", withExtension: "mp3") else {
+            print("Switch audio file not found")
+            return
+        }
+
+        do {
+            switchPlayer = try AVAudioPlayer(contentsOf: url)
+            switchPlayer?.prepareToPlay()
+            switchPlayer?.volume = 0.6
+        } catch {
+            print("Switch audio setup failed: \(error)")
+        }
+    }
+
+    /// Play the switch toggle sound (always plays, regardless of isEnabled).
+    func playSwitch() {
+        switchPlayer?.currentTime = 0
+        switchPlayer?.play()
     }
 
     /// Check if a click should be played and play it if needed.

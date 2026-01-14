@@ -30,6 +30,22 @@ extension Color {
     static let meterNeedleDark = Color(hex: "FF3333")
     static let meterPivotDark = Color(hex: "CC0000")
 
+    // Vintage Meter Colors
+    static let vintageBezel = Color(hex: "1A1A1A")
+    static let vintageBezelHighlight = Color(hex: "3A3A3A")
+    static let vintageFace = Color(hex: "F5F0E1")
+    static let vintageFaceEdge = Color(hex: "E8E0C8")
+    static let vintageArc = Color(hex: "5B8FA8")
+    static let vintageArcDark = Color(hex: "4A7A8F")
+    static let vintageScale = Color(hex: "333333")
+    static let vintageNeedle = Color(hex: "1A1A1A")
+    static let vintagePivot = Color(hex: "2A2A2A")
+    static let vintageBrass = Color(hex: "B8860B")
+    static let vintageBrassHighlight = Color(hex: "DAA520")
+    static let vintageBrassShadow = Color(hex: "8B6914")
+    static let vintageCasing = Color(hex: "A8A8A0")
+    static let vintageCasingDark = Color(hex: "888880")
+
     // Digital Display
     static let digitalBackground = Color(hex: "1A3A1A")
     static let digitalBackgroundDark = Color(hex: "0A1A0A")
@@ -81,6 +97,21 @@ struct MeterColors {
     let digitalSegmentOff: Color
     let digitalBorder: Color
 
+    // Vintage colors
+    let vintageBezel: Color
+    let vintageBezelHighlight: Color
+    let vintageFace: Color
+    let vintageFaceEdge: Color
+    let vintageArc: Color
+    let vintageScale: Color
+    let vintageNeedle: Color
+    let vintagePivot: Color
+    let vintageBrass: Color
+    let vintageBrassHighlight: Color
+    let vintageBrassShadow: Color
+    let vintageCasing: Color
+    let vintageCasingDark: Color
+
     static func colors(for colorScheme: ColorScheme) -> MeterColors {
         if colorScheme == .dark {
             return MeterColors(
@@ -92,7 +123,20 @@ struct MeterColors {
                 digitalBackground: .digitalBackgroundDark,
                 digitalText: .digitalText,
                 digitalSegmentOff: .digitalSegmentOff,
-                digitalBorder: .digitalBorder
+                digitalBorder: .digitalBorder,
+                vintageBezel: .vintageBezel,
+                vintageBezelHighlight: .vintageBezelHighlight,
+                vintageFace: Color(hex: "3A3530"),
+                vintageFaceEdge: Color(hex: "2A2520"),
+                vintageArc: .vintageArcDark,
+                vintageScale: Color(hex: "D0D0D0"),
+                vintageNeedle: Color(hex: "E0E0E0"),
+                vintagePivot: Color(hex: "4A4A4A"),
+                vintageBrass: .vintageBrass,
+                vintageBrassHighlight: .vintageBrassHighlight,
+                vintageBrassShadow: .vintageBrassShadow,
+                vintageCasing: Color(hex: "3A3A38"),
+                vintageCasingDark: Color(hex: "2A2A28")
             )
         } else {
             return MeterColors(
@@ -104,7 +148,20 @@ struct MeterColors {
                 digitalBackground: .digitalBackground,
                 digitalText: .digitalText,
                 digitalSegmentOff: .digitalSegmentOff,
-                digitalBorder: .digitalBorder
+                digitalBorder: .digitalBorder,
+                vintageBezel: .vintageBezel,
+                vintageBezelHighlight: .vintageBezelHighlight,
+                vintageFace: .vintageFace,
+                vintageFaceEdge: .vintageFaceEdge,
+                vintageArc: .vintageArc,
+                vintageScale: .vintageScale,
+                vintageNeedle: .vintageNeedle,
+                vintagePivot: .vintagePivot,
+                vintageBrass: .vintageBrass,
+                vintageBrassHighlight: .vintageBrassHighlight,
+                vintageBrassShadow: .vintageBrassShadow,
+                vintageCasing: .vintageCasing,
+                vintageCasingDark: .vintageCasingDark
             )
         }
     }
