@@ -321,8 +321,9 @@ private struct HazardIndicatorView: View {
                     .offset(x: -2, y: -6)
             }
 
-            // Risk label plate with info button
-            HStack(spacing: 6) {
+            // Risk label plate with info button (centered under light)
+            ZStack {
+                // Label plate (centered)
                 ZStack {
                     RoundedRectangle(cornerRadius: 3)
                         .fill(Color(hex: "2A2A25"))
@@ -346,7 +347,7 @@ private struct HazardIndicatorView: View {
                         .shadow(color: riskLevel.color.opacity(0.5), radius: 2, x: 0, y: 0)
                 }
 
-                // Info button (sized to match label)
+                // Info button (offset to the right)
                 Button(action: onInfoTap) {
                     ZStack {
                         Circle()
@@ -365,6 +366,7 @@ private struct HazardIndicatorView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .offset(x: 47)
             }
         }
     }

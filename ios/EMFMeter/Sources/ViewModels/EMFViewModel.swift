@@ -33,7 +33,7 @@ class EMFViewModel: ObservableObject {
     @Published var needlePosition: Float = 0
     @Published var displayValue: Float = 0
     @Published var displayMode: DisplayMode = .analog
-    @Published var selectedUnit: EMFUnit = .milliGauss
+    @Published var selectedUnit: EMFUnit = .microTesla
     @Published var soundEnabled: Bool = true
     @Published var isCalibrated: Bool = false
     @Published var sensorAvailable: Bool = true
