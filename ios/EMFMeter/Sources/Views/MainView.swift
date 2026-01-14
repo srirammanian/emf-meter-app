@@ -247,7 +247,7 @@ private struct TitlePlateView: View {
                 .frame(width: 198, height: 34)
 
             // Embossed text
-            Text("EMF DETECTOR")
+            Text("EMF SCOPE")
                 .font(.system(size: 16, weight: .bold, design: .serif))
                 .tracking(3)
                 .foregroundColor(Color(hex: "C0C0B0"))
@@ -625,7 +625,7 @@ private struct VintageToggleSwitchView: View {
                     .font(.system(size: 7, weight: .bold))
                     .foregroundColor(isOn ? onColor : Color(hex: "C44536"))
             }
-            .frame(height: 10)
+            .frame(width: 36, height: 10)
         }
     }
 }
@@ -713,7 +713,7 @@ private struct VintagePushButtonView: View {
                     .font(.system(size: 7, weight: .bold))
                     .foregroundColor(Color(hex: "4CAF50"))
             }
-            .frame(height: 10)
+            .frame(width: 36, height: 10)
         }
     }
 }
@@ -725,7 +725,7 @@ private struct VintageDialButtonView: View {
     var body: some View {
         VStack(spacing: 8) {
             // Label
-            Text("CONFIG")
+            Text("SETTINGS")
                 .font(.system(size: 10, weight: .bold))
                 .tracking(1)
                 .foregroundColor(Color(hex: "B0B0A0"))
@@ -790,7 +790,7 @@ private struct VintageDialButtonView: View {
 
             // Spacer to align with other controls
             Spacer()
-                .frame(height: 10)
+                .frame(width: 36, height: 10)
         }
     }
 }

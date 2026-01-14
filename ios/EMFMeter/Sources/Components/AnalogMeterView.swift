@@ -67,7 +67,7 @@ struct AnalogMeterView: View {
 
                 // Company text above gauge
                 VStack {
-                    Text("PRECISION EMF INSTRUMENTS")
+                    Text("PRECISION EMF SCOPE")
                         .font(.system(size: size * 0.028, weight: .medium))
                         .tracking(1.5)
                         .foregroundColor(colors.vintageScale.opacity(0.8))

@@ -12,6 +12,7 @@ private enum EMFViewModelKeys {
     static let calibrationY = "calibrationY"
     static let calibrationZ = "calibrationZ"
     static let calibrationTimestamp = "calibrationTimestamp"
+    static let hasLaunchedBefore = "hasLaunchedBefore"
 }
 
 /// ViewModel for the EMF Meter.
@@ -24,6 +25,7 @@ class EMFViewModel: ObservableObject {
 
     // Calibration
     private var calibrationData: CalibrationData = .none
+    private var needsAutoCalibration: Bool = false
 
     // Display link for animation
     private var displayLink: CADisplayLink?
@@ -103,6 +105,13 @@ class EMFViewModel: ObservableObject {
             )
             isCalibrated = true
         }
+
+        // Check if this is the first launch - if so, auto-calibrate once we get a reading
+        let hasLaunchedBefore = defaults.bool(forKey: EMFViewModelKeys.hasLaunchedBefore)
+        if !hasLaunchedBefore {
+            needsAutoCalibration = true
+            defaults.set(true, forKey: EMFViewModelKeys.hasLaunchedBefore)
+        }
     }
 
     private func setupBindings() {
@@ -139,6 +148,20 @@ class EMFViewModel: ObservableObject {
     }
 
     private func processReading(_ reading: EMFReading) {
+        // Auto-calibrate on first launch once we have a valid reading
+        if needsAutoCalibration {
+            calibrationData = CalibrationData.from(reading: reading)
+            isCalibrated = true
+            needsAutoCalibration = false
+
+            // Persist the auto-calibration
+            let defaults = UserDefaults.standard
+            defaults.set(calibrationData.offsetX, forKey: EMFViewModelKeys.calibrationX)
+            defaults.set(calibrationData.offsetY, forKey: EMFViewModelKeys.calibrationY)
+            defaults.set(calibrationData.offsetZ, forKey: EMFViewModelKeys.calibrationZ)
+            defaults.set(calibrationData.timestamp, forKey: EMFViewModelKeys.calibrationTimestamp)
+        }
+
         let calibrated = calibrationData.apply(to: reading)
         let magnitude = calibrated.magnitude
         let normalized = min(max(magnitude / MeterConfig.maxValueUT, 0), 1)
