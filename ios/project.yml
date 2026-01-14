@@ -1,0 +1,61 @@
+name: EMFMeter
+options:
+  bundleIdPrefix: com.emfmeter
+  deploymentTarget:
+    iOS: "15.0"
+  xcodeVersion: "15.0"
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""  # Add your team ID here
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  EMFMeter:
+    type: application
+    platform: iOS
+    sources:
+      - path: EMFMeter/Sources
+        type: group
+      - path: EMFMeter/Resources
+        type: group
+      - path: EMFMeter/Info.plist
+        type: file
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.emfmeter.app
+        INFOPLIST_FILE: EMFMeter/Info.plist
+        SWIFT_VERSION: "5.9"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
+        IPHONEOS_DEPLOYMENT_TARGET: "15.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    info:
+      path: EMFMeter/Info.plist
+      properties:
+        CFBundleDisplayName: EMF Meter
+        UILaunchScreen:
+          UIColorName: LaunchScreenBackground
+    entitlements:
+      path: EMFMeter/EMFMeter.entitlements
+      properties: {}
+
+schemes:
+  EMFMeter:
+    build:
+      targets:
+        EMFMeter: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

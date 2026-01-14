@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors -->
+    <color name="primary">#8B4513</color>
+    <color name="primary_variant">#6B3410</color>
+    <color name="on_primary">#FFFFFF</color>
+
+    <!-- Background Colors -->
+    <color name="background_light">#F5F5DC</color>
+    <color name="background_dark">#1A1A1A</color>
+
+    <!-- Meter Colors -->
+    <color name="meter_bezel_light">#8B8B7A</color>
+    <color name="meter_bezel_dark">#2C2C2C</color>
+    <color name="meter_face_light">#FFFEF0</color>
+    <color name="meter_face_dark">#252525</color>
+    <color name="meter_scale_light">#333333</color>
+    <color name="meter_scale_dark">#E0E0E0</color>
+    <color name="meter_needle">#CC0000</color>
+    <color name="meter_needle_dark">#FF3333</color>
+    <color name="meter_pivot">#8B0000</color>
+
+    <!-- Digital Display Colors -->
+    <color name="digital_background">#1A3A1A</color>
+    <color name="digital_background_dark">#0A1A0A</color>
+    <color name="digital_text">#00FF00</color>
+    <color name="digital_segment_off">#0A200A</color>
+
+    <!-- Accent Colors -->
+    <color name="accent_light">#8B4513</color>
+    <color name="accent_dark">#CD853F</color>
+</resources>

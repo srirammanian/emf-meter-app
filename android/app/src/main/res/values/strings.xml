@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EMF Meter</string>
+    <string name="analog_mode">Analog</string>
+    <string name="digital_mode">Digital</string>
+    <string name="calibrate">Calibrate</string>
+    <string name="sound">Sound</string>
+    <string name="settings">Settings</string>
+    <string name="unit_selection">Unit</string>
+    <string name="theme_selection">Theme</string>
+    <string name="reset_calibration">Reset Calibration</string>
+    <string name="about">About</string>
+    <string name="sensor_unavailable">Magnetometer not available on this device</string>
+    <string name="calibration_success">Calibration complete</string>
+    <string name="calibration_reset">Calibration reset</string>
+
+    <!-- Units -->
+    <string name="unit_microtesla">MicroTesla (µT)</string>
+    <string name="unit_milligauss">MilliGauss (mG)</string>
+    <string name="unit_gauss">Gauss (G)</string>
+
+    <!-- Themes -->
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+
+    <!-- Disclaimer -->
+    <string name="disclaimer_title">Disclaimer</string>
+    <string name="disclaimer_text">This app is for educational and entertainment purposes only. It is not a certified EMF measurement device. Readings may vary based on device sensor quality and should not be used for safety decisions.</string>
+</resources>
