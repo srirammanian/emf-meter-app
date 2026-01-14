@@ -11,17 +11,17 @@ enum SoundClickCalculator {
 
         switch normalizedValue {
         case ..<0.2:
-            // 0.05-0.2: 1-5 clicks per second
-            return 1 + (normalizedValue - MeterConfig.clickThreshold) * 26.67
+            // 0.05-0.2: 0.5-2 clicks per second
+            return 0.5 + (normalizedValue - MeterConfig.clickThreshold) * 10
         case ..<0.5:
-            // 0.2-0.5: 5-20 clicks per second
-            return 5 + (normalizedValue - 0.2) * 50
+            // 0.2-0.5: 2-6 clicks per second
+            return 2 + (normalizedValue - 0.2) * 13.3
         case ..<0.8:
-            // 0.5-0.8: 20-50 clicks per second
-            return 20 + (normalizedValue - 0.5) * 100
+            // 0.5-0.8: 6-12 clicks per second
+            return 6 + (normalizedValue - 0.5) * 20
         default:
-            // 0.8-1.0: 50-80 clicks per second
-            return min(50 + (normalizedValue - 0.8) * 150, MeterConfig.maxClickRate)
+            // 0.8-1.0: 12-18 clicks per second
+            return min(12 + (normalizedValue - 0.8) * 30, 18)
         }
     }
 

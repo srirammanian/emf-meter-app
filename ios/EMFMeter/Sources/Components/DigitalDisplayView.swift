@@ -39,19 +39,10 @@ struct DigitalDisplayView: View {
                 // LCD screen
                 VStack(spacing: 16) {
                     // Main value display
-                    ZStack {
-                        // Background "off" segments
-                        Text(String(repeating: "8", count: formattedValue.filter { $0 != "." }.count))
-                            .font(.system(size: 72, weight: .bold, design: .monospaced))
-                            .tracking(8)
-                            .foregroundColor(colors.digitalSegmentOff)
-
-                        // Active digits
-                        Text(formattedValue)
-                            .font(.system(size: 72, weight: .bold, design: .monospaced))
-                            .tracking(8)
-                            .foregroundColor(colors.digitalText)
-                    }
+                    Text(formattedValue)
+                        .font(.system(size: 72, weight: .bold, design: .monospaced))
+                        .tracking(8)
+                        .foregroundColor(colors.digitalText)
 
                     // Unit and indicators
                     HStack(spacing: 16) {

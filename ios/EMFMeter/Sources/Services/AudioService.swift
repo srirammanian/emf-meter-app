@@ -2,14 +2,17 @@ import Foundation
 import AVFoundation
 
 /// Service for playing Geiger counter click sounds.
+/// Uses a pool of audio players to support rapid overlapping clicks.
 class AudioService: ObservableObject {
-    private var audioPlayer: AVAudioPlayer?
+    private var audioPlayers: [AVAudioPlayer] = []
+    private var currentPlayerIndex: Int = 0
     private var lastClickTime: Date = .distantPast
+    private let playerPoolSize = 4  // Pool of players for overlapping sounds
 
     @Published var isEnabled: Bool = true {
         didSet {
             if !isEnabled {
-                audioPlayer?.stop()
+                audioPlayers.forEach { $0.stop() }
             }
         }
     }
@@ -28,9 +31,13 @@ class AudioService: ObservableObject {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
 
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.prepareToPlay()
-            audioPlayer?.volume = 0.5
+            // Create a pool of audio players for overlapping playback
+            for _ in 0..<playerPoolSize {
+                let player = try AVAudioPlayer(contentsOf: url)
+                player.prepareToPlay()
+                player.volume = 0.5
+                audioPlayers.append(player)
+            }
         } catch {
             print("Audio setup failed: \(error)")
         }
@@ -38,7 +45,7 @@ class AudioService: ObservableObject {
 
     /// Check if a click should be played and play it if needed.
     func playClickIfNeeded(normalizedValue: Float) {
-        guard isEnabled else { return }
+        guard isEnabled, !audioPlayers.isEmpty else { return }
 
         let now = Date()
         let timeSinceLastClick = now.timeIntervalSince(lastClickTime)
@@ -47,13 +54,17 @@ class AudioService: ObservableObject {
             normalizedValue: normalizedValue,
             timeSinceLastClick: timeSinceLastClick
         ) {
-            // Play with slight volume variation for realism
-            let volume = 0.4 + (normalizedValue * 0.3)
-            audioPlayer?.volume = volume
+            // Play with slight volume variation for realism (quieter overall)
+            let volume = 0.15 + (normalizedValue * 0.15)
 
-            audioPlayer?.stop()
-            audioPlayer?.currentTime = 0
-            audioPlayer?.play()
+            // Use next player in the pool (round-robin)
+            let player = audioPlayers[currentPlayerIndex]
+            currentPlayerIndex = (currentPlayerIndex + 1) % playerPoolSize
+
+            player.volume = volume
+            player.currentTime = 0
+            player.play()
+
             lastClickTime = now
         }
     }

@@ -52,9 +52,15 @@ private struct ModeOption: View {
     }
 }
 
-#Preview {
-    @Previewable @State var mode: DisplayMode = .analog
+private struct ModeTogglePreview: View {
+    @State private var mode: DisplayMode = .analog
 
-    ModeToggleView(currentMode: $mode)
-        .padding()
+    var body: some View {
+        ModeToggleView(currentMode: $mode)
+            .padding()
+    }
+}
+
+#Preview {
+    ModeTogglePreview()
 }

@@ -12,7 +12,8 @@ struct AnalogMeterView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let size = min(geometry.size.width, geometry.size.height * 1.3)
+            let width = geometry.size.width
+            let height = geometry.size.height
 
             ZStack {
                 // Outer bezel
@@ -28,18 +29,17 @@ struct AnalogMeterView: View {
                             endPoint: .bottom
                         )
                     )
-                    .frame(width: size, height: size * 0.77)
 
                 // Meter face
                 RoundedRectangle(cornerRadius: 8)
                     .fill(colors.face)
-                    .frame(width: size - 24, height: size * 0.77 - 24)
+                    .padding(12)
 
                 // Meter canvas
                 Canvas { context, canvasSize in
                     let centerX = canvasSize.width / 2
                     let centerY = canvasSize.height * 0.85
-                    let radius = canvasSize.width * 0.38
+                    let radius = min(canvasSize.width * 0.45, canvasSize.height * 0.75)
 
                     // Draw arc background
                     drawArcBackground(
@@ -70,24 +70,25 @@ struct AnalogMeterView: View {
                         position: CGFloat(needlePosition)
                     )
                 }
-                .frame(width: size - 24, height: size * 0.77 - 24)
+                .padding(12)
 
                 // Scale labels
                 ScaleLabelsView(
                     unit: unit,
-                    size: size
+                    width: width,
+                    height: height
                 )
 
                 // Unit label
                 Text(unit.symbol)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 18, weight: .medium))
                     .foregroundColor(colors.scale)
-                    .offset(y: size * 0.15)
+                    .offset(y: height * 0.15)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .aspectRatio(1.3, contentMode: .fit)
-        .padding()
+        .aspectRatio(16.0/9.0, contentMode: .fit)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 16)
     }
 
     private func drawArcBackground(
@@ -96,18 +97,19 @@ struct AnalogMeterView: View {
         radius: CGFloat
     ) {
         var path = Path()
+        // Full 180° semicircle from left (180°) to right (0°)
         path.addArc(
             center: center,
             radius: radius,
-            startAngle: .degrees(225),
-            endAngle: .degrees(315),
-            clockwise: false
+            startAngle: .degrees(180),
+            endAngle: .degrees(0),
+            clockwise: true
         )
 
         context.stroke(
             path,
             with: .color(colors.bezel.opacity(0.3)),
-            lineWidth: 30
+            lineWidth: 20
         )
     }
 
@@ -117,18 +119,19 @@ struct AnalogMeterView: View {
         radius: CGFloat
     ) {
         var path = Path()
+        // Danger zone at the high end (right side, last 20% of arc)
         path.addArc(
             center: center,
             radius: radius,
-            startAngle: .degrees(135),
-            endAngle: .degrees(153),
+            startAngle: .degrees(36),
+            endAngle: .degrees(0),
             clockwise: true
         )
 
         context.stroke(
             path,
-            with: .color(.red.opacity(0.2)),
-            lineWidth: 25
+            with: .color(.red.opacity(0.3)),
+            lineWidth: 18
         )
     }
 
@@ -138,11 +141,13 @@ struct AnalogMeterView: View {
         radius: CGFloat
     ) {
         let totalTicks = MeterConfig.majorDivisions * MeterConfig.minorDivisions
-        let degreesPerTick = 90.0 / Double(totalTicks)
+        // 180° sweep from left to right
+        let degreesPerTick = 180.0 / Double(totalTicks)
 
         for i in 0...totalTicks {
             let isMajor = i % MeterConfig.minorDivisions == 0
-            let angle = (225.0 - Double(i) * degreesPerTick) * .pi / 180
+            // Start at 180° (left) and go to 0° (right)
+            let angle = CGFloat((180.0 - Double(i) * degreesPerTick) * .pi / 180)
 
             let innerRadius = radius * (isMajor ? 0.82 : 0.87)
             let outerRadius = radius * 0.95
@@ -160,7 +165,7 @@ struct AnalogMeterView: View {
             context.stroke(
                 tickPath,
                 with: .color(colors.scale),
-                lineWidth: isMajor ? 3 : 1.5
+                lineWidth: isMajor ? 2.5 : 1
             )
         }
     }
@@ -172,26 +177,31 @@ struct AnalogMeterView: View {
         position: CGFloat
     ) {
         let clampedPosition = min(max(position, 0), 1)
-        let needleAngle = (225.0 - Double(clampedPosition) * 90.0) * .pi / 180
+        // Needle sweeps from 180° (left, min) to 0° (right, max)
+        let needleAngle = CGFloat((180.0 - Double(clampedPosition) * 180.0) * .pi / 180)
         let needleLength = radius * 0.78
+        let baseWidth: CGFloat = 5
+
+        // Calculate perpendicular offset for needle base
+        let perpAngle = needleAngle + .pi / 2
+        let baseOffsetX = baseWidth * cos(perpAngle)
+        let baseOffsetY = baseWidth * sin(perpAngle)
+
+        // Needle tip
+        let tipX = center.x + needleLength * cos(needleAngle)
+        let tipY = center.y - needleLength * sin(needleAngle)
 
         // Shadow
         var shadowPath = Path()
         shadowPath.move(to: CGPoint(x: center.x + 2, y: center.y + 2))
-        shadowPath.addLine(to: CGPoint(
-            x: center.x + needleLength * cos(needleAngle) + 2,
-            y: center.y - needleLength * sin(needleAngle) + 2
-        ))
+        shadowPath.addLine(to: CGPoint(x: tipX + 2, y: tipY + 2))
         context.stroke(shadowPath, with: .color(.black.opacity(0.3)), lineWidth: 5)
 
-        // Needle body
+        // Needle body - base is perpendicular to needle direction
         var needlePath = Path()
-        needlePath.move(to: CGPoint(x: center.x - 4, y: center.y))
-        needlePath.addLine(to: CGPoint(
-            x: center.x + needleLength * cos(needleAngle),
-            y: center.y - needleLength * sin(needleAngle)
-        ))
-        needlePath.addLine(to: CGPoint(x: center.x + 4, y: center.y))
+        needlePath.move(to: CGPoint(x: center.x + baseOffsetX, y: center.y - baseOffsetY))
+        needlePath.addLine(to: CGPoint(x: tipX, y: tipY))
+        needlePath.addLine(to: CGPoint(x: center.x - baseOffsetX, y: center.y + baseOffsetY))
         needlePath.closeSubpath()
 
         context.fill(needlePath, with: .color(colors.needle))
@@ -234,7 +244,8 @@ struct AnalogMeterView: View {
 /// Scale labels around the meter arc.
 private struct ScaleLabelsView: View {
     let unit: EMFUnit
-    let size: CGFloat
+    let width: CGFloat
+    let height: CGFloat
     @Environment(\.colorScheme) private var colorScheme
 
     private var colors: MeterColors {
@@ -243,20 +254,24 @@ private struct ScaleLabelsView: View {
 
     var body: some View {
         let labels = UnitConverter.getScaleLabels(for: unit, divisions: MeterConfig.majorDivisions)
-        let centerY = size * 0.77 * 0.85
-        let radius = size * 0.38 * 0.65
+        let centerY = height * 0.85
+        let radius = min(width * 0.45, height * 0.75) * 0.72
+        // 180° sweep, so each major division is 18° apart (180/10)
+        let degreesPerDivision = 180.0 / Double(MeterConfig.majorDivisions)
 
         ZStack {
+            // Show every other label to avoid crowding
             ForEach(Array(stride(from: 0, through: MeterConfig.majorDivisions, by: 2)), id: \.self) { i in
-                let angle = (225.0 - Double(i) * 9.0) * .pi / 180
+                // Start at 180° (left) and go to 0° (right)
+                let angle = CGFloat((180.0 - Double(i) * degreesPerDivision) * .pi / 180)
                 let x = radius * cos(angle)
                 let y = -radius * sin(angle)
 
                 if let label = labels[safe: i] {
                     Text(label)
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: 13, weight: .medium))
                         .foregroundColor(colors.scale)
-                        .offset(x: x, y: y + (centerY - size * 0.77 / 2))
+                        .offset(x: x, y: y + (centerY - height / 2))
                 }
             }
         }

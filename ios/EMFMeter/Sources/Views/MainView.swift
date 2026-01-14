@@ -21,21 +21,22 @@ struct MainView: View {
                         .foregroundColor(.primary)
                         .padding(.top, 16)
 
-                    // Current value display
-                    Text("\(UnitConverter.formatValue(viewModel.displayValue, unit: viewModel.selectedUnit)) \(viewModel.selectedUnit.symbol)")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(.appPrimary)
-                        .padding(.vertical, 8)
-
                     Spacer()
 
                     // Meter display (Analog or Digital)
                     Group {
                         if viewModel.displayMode == .analog {
-                            AnalogMeterView(
-                                needlePosition: viewModel.needlePosition,
-                                unit: viewModel.selectedUnit
-                            )
+                            VStack(spacing: 8) {
+                                AnalogMeterView(
+                                    needlePosition: viewModel.needlePosition,
+                                    unit: viewModel.selectedUnit
+                                )
+
+                                // Current value display (only shown in analog mode)
+                                Text("\(UnitConverter.formatValue(viewModel.displayValue, unit: viewModel.selectedUnit)) \(viewModel.selectedUnit.symbol)")
+                                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                                    .foregroundColor(.appPrimary)
+                            }
                             .transition(.opacity)
                         } else {
                             DigitalDisplayView(

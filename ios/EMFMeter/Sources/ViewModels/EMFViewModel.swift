@@ -1,11 +1,24 @@
 import SwiftUI
 import Combine
 
+// MARK: - UserDefaults Keys
+
+private enum EMFViewModelKeys {
+    static let unit = "selectedUnit"
+    static let soundEnabled = "soundEnabled"
+    static let displayMode = "displayMode"
+    static let theme = "theme"
+    static let calibrationX = "calibrationX"
+    static let calibrationY = "calibrationY"
+    static let calibrationZ = "calibrationZ"
+    static let calibrationTimestamp = "calibrationTimestamp"
+}
+
 /// ViewModel for the EMF Meter.
 @MainActor
 class EMFViewModel: ObservableObject {
-    // Services
-    private let magnetometerService = MagnetometerService()
+    // Services - using type-erased wrapper for protocol
+    private let magnetometerService: AnyMagnetometerService
     private let audioService = AudioService()
     private let needlePhysics = NeedlePhysicsEngine()
 
@@ -30,19 +43,27 @@ class EMFViewModel: ObservableObject {
     // Current processed reading
     private var currentReading: ProcessedReading?
 
-    // UserDefaults keys
-    private enum Keys {
-        static let unit = "selectedUnit"
-        static let soundEnabled = "soundEnabled"
-        static let displayMode = "displayMode"
-        static let theme = "theme"
-        static let calibrationX = "calibrationX"
-        static let calibrationY = "calibrationY"
-        static let calibrationZ = "calibrationZ"
-        static let calibrationTimestamp = "calibrationTimestamp"
+    /// Initialize with automatic service selection (mock on simulator, real on device).
+    convenience init() {
+        #if targetEnvironment(simulator)
+        self.init(magnetometerService: AnyMagnetometerService(MockMagnetometerService()))
+        #else
+        self.init(magnetometerService: AnyMagnetometerService(MagnetometerService()))
+        #endif
     }
 
-    init() {
+    /// Initialize with a specific magnetometer service (for testing/customization).
+    init<T: MagnetometerServiceProtocol>(magnetometerService: T) {
+        self.magnetometerService = AnyMagnetometerService(magnetometerService)
+        loadSettings()
+        setupBindings()
+        setupDisplayLink()
+        sensorAvailable = self.magnetometerService.isAvailable
+    }
+
+    /// Initialize with a type-erased service directly.
+    init(magnetometerService: AnyMagnetometerService) {
+        self.magnetometerService = magnetometerService
         loadSettings()
         setupBindings()
         setupDisplayLink()
@@ -53,31 +74,31 @@ class EMFViewModel: ObservableObject {
         let defaults = UserDefaults.standard
 
         // Load unit
-        if let unitString = defaults.string(forKey: Keys.unit),
+        if let unitString = defaults.string(forKey: EMFViewModelKeys.unit),
            let unit = EMFUnit(rawValue: unitString) {
             selectedUnit = unit
         }
 
         // Load sound
-        soundEnabled = defaults.object(forKey: Keys.soundEnabled) as? Bool ?? true
+        soundEnabled = defaults.object(forKey: EMFViewModelKeys.soundEnabled) as? Bool ?? true
         audioService.isEnabled = soundEnabled
 
         // Load display mode
-        if let modeString = defaults.string(forKey: Keys.displayMode),
+        if let modeString = defaults.string(forKey: EMFViewModelKeys.displayMode),
            let mode = DisplayMode(rawValue: modeString) {
             displayMode = mode
         }
 
         // Load theme
-        theme = defaults.string(forKey: Keys.theme) ?? "system"
+        theme = defaults.string(forKey: EMFViewModelKeys.theme) ?? "system"
 
         // Load calibration
-        let calibrationTimestamp = defaults.double(forKey: Keys.calibrationTimestamp)
+        let calibrationTimestamp = defaults.double(forKey: EMFViewModelKeys.calibrationTimestamp)
         if calibrationTimestamp > 0 {
             calibrationData = CalibrationData(
-                offsetX: defaults.float(forKey: Keys.calibrationX),
-                offsetY: defaults.float(forKey: Keys.calibrationY),
-                offsetZ: defaults.float(forKey: Keys.calibrationZ),
+                offsetX: defaults.float(forKey: EMFViewModelKeys.calibrationX),
+                offsetY: defaults.float(forKey: EMFViewModelKeys.calibrationY),
+                offsetZ: defaults.float(forKey: EMFViewModelKeys.calibrationZ),
                 timestamp: calibrationTimestamp
             )
             isCalibrated = true
@@ -136,7 +157,7 @@ class EMFViewModel: ObservableObject {
 
     func setDisplayMode(_ mode: DisplayMode) {
         displayMode = mode
-        UserDefaults.standard.set(mode.rawValue, forKey: Keys.displayMode)
+        UserDefaults.standard.set(mode.rawValue, forKey: EMFViewModelKeys.displayMode)
     }
 
     func setUnit(_ unit: EMFUnit) {
@@ -144,13 +165,13 @@ class EMFViewModel: ObservableObject {
         if let reading = currentReading {
             displayValue = UnitConverter.convert(reading.magnitude, from: .microTesla, to: unit)
         }
-        UserDefaults.standard.set(unit.rawValue, forKey: Keys.unit)
+        UserDefaults.standard.set(unit.rawValue, forKey: EMFViewModelKeys.unit)
     }
 
     func toggleSound() {
         soundEnabled.toggle()
         audioService.isEnabled = soundEnabled
-        UserDefaults.standard.set(soundEnabled, forKey: Keys.soundEnabled)
+        UserDefaults.standard.set(soundEnabled, forKey: EMFViewModelKeys.soundEnabled)
     }
 
     func calibrate() {
@@ -160,10 +181,10 @@ class EMFViewModel: ObservableObject {
         isCalibrated = true
 
         let defaults = UserDefaults.standard
-        defaults.set(calibrationData.offsetX, forKey: Keys.calibrationX)
-        defaults.set(calibrationData.offsetY, forKey: Keys.calibrationY)
-        defaults.set(calibrationData.offsetZ, forKey: Keys.calibrationZ)
-        defaults.set(calibrationData.timestamp, forKey: Keys.calibrationTimestamp)
+        defaults.set(calibrationData.offsetX, forKey: EMFViewModelKeys.calibrationX)
+        defaults.set(calibrationData.offsetY, forKey: EMFViewModelKeys.calibrationY)
+        defaults.set(calibrationData.offsetZ, forKey: EMFViewModelKeys.calibrationZ)
+        defaults.set(calibrationData.timestamp, forKey: EMFViewModelKeys.calibrationTimestamp)
     }
 
     func resetCalibration() {
@@ -171,15 +192,15 @@ class EMFViewModel: ObservableObject {
         isCalibrated = false
 
         let defaults = UserDefaults.standard
-        defaults.removeObject(forKey: Keys.calibrationX)
-        defaults.removeObject(forKey: Keys.calibrationY)
-        defaults.removeObject(forKey: Keys.calibrationZ)
-        defaults.removeObject(forKey: Keys.calibrationTimestamp)
+        defaults.removeObject(forKey: EMFViewModelKeys.calibrationX)
+        defaults.removeObject(forKey: EMFViewModelKeys.calibrationY)
+        defaults.removeObject(forKey: EMFViewModelKeys.calibrationZ)
+        defaults.removeObject(forKey: EMFViewModelKeys.calibrationTimestamp)
     }
 
     func setTheme(_ theme: String) {
         self.theme = theme
-        UserDefaults.standard.set(theme, forKey: Keys.theme)
+        UserDefaults.standard.set(theme, forKey: EMFViewModelKeys.theme)
     }
 
     func start() {
