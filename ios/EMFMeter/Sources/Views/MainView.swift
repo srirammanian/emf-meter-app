@@ -22,7 +22,10 @@ struct MainView: View {
                 if !viewModel.sensorAvailable {
                     SensorUnavailableView()
                 } else {
-                    VStack(spacing: 0) {
+                    // Uniform spacing between panels
+                    let panelSpacing: CGFloat = 12
+
+                    VStack(spacing: panelSpacing) {
                         // Embossed title plate with info button
                         HStack(spacing: 12) {
                             TitlePlateView()
@@ -49,9 +52,7 @@ struct MainView: View {
                             .accessibilityLabel("Information")
                             .accessibilityHint("Shows safety information and guidelines about EMF readings")
                         }
-                        .padding(.top, geometry.safeAreaInsets.top + 16)
-
-                        Spacer()
+                        .padding(.top, geometry.safeAreaInsets.top + 4)
 
                         // Analog meter display (centered)
                         AnalogMeterView(
@@ -64,9 +65,6 @@ struct MainView: View {
                         .accessibilityValue("\(UnitConverter.formatValue(viewModel.displayValue, unit: viewModel.selectedUnit)) \(viewModel.selectedUnit.accessibilityName)")
                         .accessibilityAddTraits(.updatesFrequently)
 
-                        Spacer()
-                            .frame(height: 16)
-
                         // Recording panel: Oscilloscope + Record button (Pro features)
                         RecordingPanelView(
                             readings: recordingService.liveReadings,
@@ -78,8 +76,6 @@ struct MainView: View {
                             onUpgradeNeeded: { showUpgradePrompt = true }
                         )
                         .padding(.horizontal, 16)
-
-                        Spacer()
 
                         // Vintage control panel
                         VintageControlPanelView(
