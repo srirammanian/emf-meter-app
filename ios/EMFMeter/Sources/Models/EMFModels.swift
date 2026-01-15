@@ -141,3 +141,114 @@ enum MeterConfig {
     static let maxClickRate: Float = 80
     static let clickThreshold: Float = 0.05
 }
+
+// MARK: - V2 Pro Features Models
+
+/// A single timestamped reading for recording sessions.
+struct TimestampedReading: Codable, Equatable {
+    let timestamp: TimeInterval  // Seconds since session start
+    let x: Float
+    let y: Float
+    let z: Float
+    let magnitude: Float
+
+    init(timestamp: TimeInterval, reading: EMFReading) {
+        self.timestamp = timestamp
+        self.x = reading.x
+        self.y = reading.y
+        self.z = reading.z
+        self.magnitude = reading.magnitude
+    }
+
+    init(timestamp: TimeInterval, x: Float, y: Float, z: Float, magnitude: Float) {
+        self.timestamp = timestamp
+        self.x = x
+        self.y = y
+        self.z = z
+        self.magnitude = magnitude
+    }
+}
+
+/// Statistics calculated from a session's readings.
+struct SessionStatistics: Codable, Equatable {
+    let minMagnitude: Float
+    let maxMagnitude: Float
+    let avgMagnitude: Float
+    let readingCount: Int
+
+    init(readings: [TimestampedReading]) {
+        guard !readings.isEmpty else {
+            self.minMagnitude = 0
+            self.maxMagnitude = 0
+            self.avgMagnitude = 0
+            self.readingCount = 0
+            return
+        }
+        self.minMagnitude = readings.map(\.magnitude).min() ?? 0
+        self.maxMagnitude = readings.map(\.magnitude).max() ?? 0
+        self.avgMagnitude = readings.map(\.magnitude).reduce(0, +) / Float(readings.count)
+        self.readingCount = readings.count
+    }
+
+    static let empty = SessionStatistics(readings: [])
+}
+
+/// A complete recording session with all readings.
+struct RecordingSession: Identifiable, Codable, Equatable {
+    let id: UUID
+    var name: String?
+    var notes: String?
+    let startTime: Date
+    var endTime: Date?
+    var readings: [TimestampedReading]
+
+    var duration: TimeInterval {
+        (endTime ?? Date()).timeIntervalSince(startTime)
+    }
+
+    var statistics: SessionStatistics {
+        SessionStatistics(readings: readings)
+    }
+
+    init(id: UUID = UUID(), name: String? = nil, notes: String? = nil, startTime: Date = Date(), endTime: Date? = nil, readings: [TimestampedReading] = []) {
+        self.id = id
+        self.name = name
+        self.notes = notes
+        self.startTime = startTime
+        self.endTime = endTime
+        self.readings = readings
+    }
+}
+
+/// Lightweight metadata for session list display.
+struct SessionMetadata: Identifiable, Codable, Equatable {
+    let id: UUID
+    var name: String?
+    let startTime: Date
+    let endTime: Date
+    let duration: TimeInterval
+    let readingCount: Int
+    let minMagnitude: Float
+    let maxMagnitude: Float
+    let avgMagnitude: Float
+
+    init(from session: RecordingSession) {
+        self.id = session.id
+        self.name = session.name
+        self.startTime = session.startTime
+        self.endTime = session.endTime ?? Date()
+        self.duration = session.duration
+        self.readingCount = session.readings.count
+        let stats = session.statistics
+        self.minMagnitude = stats.minMagnitude
+        self.maxMagnitude = stats.maxMagnitude
+        self.avgMagnitude = stats.avgMagnitude
+    }
+}
+
+/// Recording configuration constants.
+enum RecordingConfig {
+    static let defaultMaxBackgroundDuration: TimeInterval = 3600  // 1 hour
+    static let maxBackgroundDuration: TimeInterval = 10800        // 3 hours
+    static let minBackgroundDuration: TimeInterval = 300          // 5 minutes
+}

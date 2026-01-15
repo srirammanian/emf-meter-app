@@ -12,6 +12,15 @@
 		UITEST002233445566778899 /* EMFMeterEdgeCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITEST223344556677889900 /* EMFMeterEdgeCaseTests.swift */; };
 		1A2B3C4D5E6F7A8B9C0D1E2F /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3C4D5E6F7A8B9C0D1E2F3A /* AppIconView.swift */; };
 		1B3C4D5E6F7A8B9C0D1E2F3B /* LaunchScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4D5E6F7A8B9C0D1E2F3A4B /* LaunchScreenView.swift */; };
+		V2RSBF0011223344556677AA /* RecordingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = V2RS001122334455667788AA /* RecordingService.swift */; };
+		V2SSBF0011223344556677BB /* SessionStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = V2SS001122334455667788BB /* SessionStorage.swift */; };
+		V2SKBF0011223344556677CC /* StoreKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = V2SK001122334455667788CC /* StoreKitManager.swift */; };
+		V2ESBF0011223344556677DD /* ExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = V2ES001122334455667788DD /* ExportService.swift */; };
+		V2OVBF0011223344556677EE /* OscilloscopeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V2OV001122334455667788EE /* OscilloscopeView.swift */; };
+		V2RBBF0011223344556677FF /* RecordButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V2RB001122334455667788FF /* RecordButtonView.swift */; };
+		V2UPBF001122334455667700 /* UpgradePromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V2UP00112233445566778800 /* UpgradePromptView.swift */; };
+		V2SHBF001122334455667711 /* SessionHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V2SH00112233445566778811 /* SessionHistoryView.swift */; };
+		V2SDBF001122334455667722 /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = V2SD00112233445566778822 /* SessionDetailView.swift */; };
 		285BBE288C2E8211F78EC9B4 /* AnalogMeterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBE27F45D5922C55001FC67 /* AnalogMeterView.swift */; };
 		3C4D5E6F7A8B9C0D1E2F3A4B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4D5E6F7A8B9C0D1E2F3A4B5C /* Assets.xcassets */; };
 		410B1189B8B7C35DA1FB2B28 /* NeedlePhysicsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68809D587FBC4C0CD45E3655 /* NeedlePhysicsEngine.swift */; };
@@ -73,6 +82,16 @@
 		E2908F4CE2F100537A238902 /* ModeToggleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeToggleView.swift; sourceTree = "<group>"; };
 		F00F0E86CE38C5CFD499D72E /* EMFModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EMFModels.swift; sourceTree = "<group>"; };
 		F33353F8C1507A61029FC8F6 /* MagnetometerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MagnetometerService.swift; sourceTree = "<group>"; };
+		V2RS001122334455667788AA /* RecordingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingService.swift; sourceTree = "<group>"; };
+		V2SS001122334455667788BB /* SessionStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStorage.swift; sourceTree = "<group>"; };
+		V2SK001122334455667788CC /* StoreKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitManager.swift; sourceTree = "<group>"; };
+		V2ES001122334455667788DD /* ExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportService.swift; sourceTree = "<group>"; };
+		V2OV001122334455667788EE /* OscilloscopeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OscilloscopeView.swift; sourceTree = "<group>"; };
+		V2RB001122334455667788FF /* RecordButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordButtonView.swift; sourceTree = "<group>"; };
+		V2UP00112233445566778800 /* UpgradePromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpgradePromptView.swift; sourceTree = "<group>"; };
+		V2SH00112233445566778811 /* SessionHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionHistoryView.swift; sourceTree = "<group>"; };
+		V2SD00112233445566778822 /* SessionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDetailView.swift; sourceTree = "<group>"; };
+		V2PS00112233445566778833 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -101,6 +120,8 @@
 				9AE03C3D9A6DC2BFD8CD78B3 /* DigitalDisplayView.swift */,
 				2C4D5E6F7A8B9C0D1E2F3A4B /* LaunchScreenView.swift */,
 				E2908F4CE2F100537A238902 /* ModeToggleView.swift */,
+				V2OV001122334455667788EE /* OscilloscopeView.swift */,
+				V2RB001122334455667788FF /* RecordButtonView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -160,7 +181,11 @@
 			isa = PBXGroup;
 			children = (
 				59A075E4D9130B882E96A16C /* AudioService.swift */,
+				V2ES001122334455667788DD /* ExportService.swift */,
 				F33353F8C1507A61029FC8F6 /* MagnetometerService.swift */,
+				V2RS001122334455667788AA /* RecordingService.swift */,
+				V2SS001122334455667788BB /* SessionStorage.swift */,
+				V2SK001122334455667788CC /* StoreKitManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -169,6 +194,7 @@
 			isa = PBXGroup;
 			children = (
 				4D5E6F7A8B9C0D1E2F3A4B5C /* Assets.xcassets */,
+				V2CFGGRP001122334455667A /* Configuration */,
 				D08D6F38DC13057011BEDC34 /* Info.plist */,
 				6F7A8B9C0D1E2F3A4B5C6D7E /* LaunchScreen.storyboard */,
 			);
@@ -186,7 +212,10 @@
 			isa = PBXGroup;
 			children = (
 				27FF3A82779588DB9328B1DA /* MainView.swift */,
+				V2SD00112233445566778822 /* SessionDetailView.swift */,
+				V2SH00112233445566778811 /* SessionHistoryView.swift */,
 				1150029191777EE15DF7C37A /* SettingsView.swift */,
+				V2UP00112233445566778800 /* UpgradePromptView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -197,6 +226,14 @@
 				C1CAF04C3E6FCF1E145A078B /* Colors.swift */,
 			);
 			path = Theme;
+			sourceTree = "<group>";
+		};
+		V2CFGGRP001122334455667A /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				V2PS00112233445566778833 /* Products.storekit */,
+			);
+			path = Configuration;
 			sourceTree = "<group>";
 		};
 		E21AE5529090D5A9A373BB62 /* Sources */ = {
@@ -356,13 +393,22 @@
 				00619F13F4B531D9F4E5120A /* EMFMeterApp.swift in Sources */,
 				EA1D2D29B71F6EAEBAB428B7 /* EMFModels.swift in Sources */,
 				48B1BB5831D17CDC6B6C476C /* EMFViewModel.swift in Sources */,
+				V2ESBF0011223344556677DD /* ExportService.swift in Sources */,
 				7CE48255AC1A3C767E6B23EE /* MagnetometerService.swift in Sources */,
 				82F7152C7A6EE08914DB12A2 /* MainView.swift in Sources */,
 				D39E39776696809E5789C2FE /* ModeToggleView.swift in Sources */,
 				410B1189B8B7C35DA1FB2B28 /* NeedlePhysicsEngine.swift in Sources */,
+				V2OVBF0011223344556677EE /* OscilloscopeView.swift in Sources */,
+				V2RBBF0011223344556677FF /* RecordButtonView.swift in Sources */,
+				V2RSBF0011223344556677AA /* RecordingService.swift in Sources */,
+				V2SDBF001122334455667722 /* SessionDetailView.swift in Sources */,
+				V2SHBF001122334455667711 /* SessionHistoryView.swift in Sources */,
+				V2SSBF0011223344556677BB /* SessionStorage.swift in Sources */,
 				ADD639C2A93CEE68D1DB7917 /* SettingsView.swift in Sources */,
 				E68846645D780A5B87CB35A9 /* SoundClickCalculator.swift in Sources */,
+				V2SKBF0011223344556677CC /* StoreKitManager.swift in Sources */,
 				AF0775162A33B9AFE538A8B7 /* UnitConverter.swift in Sources */,
+				V2UPBF001122334455667700 /* UpgradePromptView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

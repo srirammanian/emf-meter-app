@@ -3,8 +3,13 @@ import SwiftUI
 /// Main view for the EMF Meter app - styled as vintage scientific equipment.
 struct MainView: View {
     @StateObject private var viewModel = EMFViewModel()
+    @StateObject private var storeManager = StoreKitManager()
+    @StateObject private var recordingService = RecordingService()
+    @StateObject private var sessionStorage = SessionStorage()
     @Environment(\.colorScheme) private var colorScheme
     @State private var showSafetyInfo = false
+    @State private var showUpgradePrompt = false
+    @State private var appStartTime = Date()
 
     var body: some View {
         GeometryReader { geometry in
@@ -48,16 +53,45 @@ struct MainView: View {
 
                         Spacer()
 
-                        // Analog meter display
-                        AnalogMeterView(
-                            needlePosition: viewModel.needlePosition,
-                            unit: viewModel.selectedUnit,
-                            displayValue: viewModel.displayValue
+                        // Analog meter with record button
+                        HStack(alignment: .center, spacing: 16) {
+                            Spacer()
+
+                            // Analog meter display
+                            AnalogMeterView(
+                                needlePosition: viewModel.needlePosition,
+                                unit: viewModel.selectedUnit,
+                                displayValue: viewModel.displayValue
+                            )
+                            .accessibilityElement(children: .ignore)
+                            .accessibilityLabel("EMF Reading")
+                            .accessibilityValue("\(UnitConverter.formatValue(viewModel.displayValue, unit: viewModel.selectedUnit)) \(viewModel.selectedUnit.accessibilityName)")
+                            .accessibilityAddTraits(.updatesFrequently)
+
+                            // Record button next to meter
+                            RecordButtonView(
+                                isRecording: recordingService.isRecording,
+                                isProUser: storeManager.isProUnlocked,
+                                duration: recordingService.isRecording ? recordingService.formattedDuration : nil,
+                                onTap: { toggleRecording() },
+                                onUpgradeNeeded: { showUpgradePrompt = true }
+                            )
+
+                            Spacer()
+                        }
+
+                        Spacer()
+                            .frame(height: 12)
+
+                        // Oscilloscope graph (Pro feature)
+                        OscilloscopeView(
+                            readings: recordingService.liveReadings,
+                            maxValue: MeterConfig.maxValueUT,
+                            isProUser: storeManager.isProUnlocked,
+                            onUpgradeNeeded: { showUpgradePrompt = true }
                         )
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("EMF Reading")
-                        .accessibilityValue("\(UnitConverter.formatValue(viewModel.displayValue, unit: viewModel.selectedUnit)) \(viewModel.selectedUnit.accessibilityName)")
-                        .accessibilityAddTraits(.updatesFrequently)
+                        .frame(height: 100)
+                        .padding(.horizontal, 20)
 
                         Spacer()
 
@@ -86,7 +120,9 @@ struct MainView: View {
                 isCalibrated: viewModel.isCalibrated,
                 onUnitChange: { viewModel.setUnit($0) },
                 onThemeChange: { viewModel.setTheme($0) },
-                onResetCalibration: { viewModel.resetCalibration() }
+                onResetCalibration: { viewModel.resetCalibration() },
+                storeManager: storeManager,
+                sessionStorage: sessionStorage
             )
             .presentationDetents([.medium, .large])
         }
@@ -94,11 +130,44 @@ struct MainView: View {
             SafetyInfoView()
                 .presentationDetents([.large])
         }
+        .sheet(isPresented: $showUpgradePrompt) {
+            UpgradePromptView(storeManager: storeManager)
+        }
         .onAppear {
             viewModel.start()
+            appStartTime = Date()
         }
         .onDisappear {
             viewModel.stop()
+        }
+        .onChange(of: viewModel.currentReading) { reading in
+            // Feed readings to oscilloscope display
+            if let reading = reading {
+                let elapsed = Date().timeIntervalSince(appStartTime)
+                if recordingService.isRecording {
+                    recordingService.addReading(reading)
+                } else if storeManager.isProUnlocked {
+                    recordingService.addLiveReading(reading, elapsed: elapsed)
+                }
+            }
+        }
+    }
+
+    // MARK: - Recording
+
+    private func toggleRecording() {
+        if recordingService.isRecording {
+            // Stop recording and save session
+            if let session = recordingService.stopRecording() {
+                do {
+                    try sessionStorage.save(session)
+                } catch {
+                    print("Failed to save session: \(error)")
+                }
+            }
+        } else {
+            // Start recording
+            recordingService.startRecording()
         }
     }
 }

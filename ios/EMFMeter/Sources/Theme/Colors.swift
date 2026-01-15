@@ -53,6 +53,22 @@ extension Color {
     static let digitalSegmentOff = Color(hex: "0A200A")
     static let digitalBorder = Color(hex: "333333")
 
+    // Oscilloscope CRT Colors
+    static let oscilloscopeBackground = Color(hex: "0A2010")
+    static let oscilloscopeBackgroundEdge = Color(hex: "051008")
+    static let oscilloscopeGrid = Color(hex: "1A4020")
+    static let oscilloscopeTrace = Color(hex: "00FF00")
+    static let oscilloscopeTraceGlow = Color(hex: "00FF00").opacity(0.3)
+    static let oscilloscopeBezel = Color(hex: "2A2A2A")
+    static let oscilloscopeBezelDark = Color(hex: "1A1A1A")
+
+    // Record Button Colors
+    static let recordButtonRed = Color(hex: "CC0000")
+    static let recordButtonRedBright = Color(hex: "FF0000")
+    static let recordButtonRedDark = Color(hex: "880000")
+    static let recordButtonHousing = Color(hex: "4A4A4A")
+    static let recordButtonHousingDark = Color(hex: "2A2A2A")
+
     // Accent
     static let accentLight = Color(hex: "8B4513")
     static let accentDark = Color(hex: "CD853F")
