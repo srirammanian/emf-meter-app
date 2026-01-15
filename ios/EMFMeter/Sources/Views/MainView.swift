@@ -59,7 +59,6 @@ struct MainView: View {
                             unit: viewModel.selectedUnit,
                             displayValue: viewModel.displayValue
                         )
-                        .padding(.horizontal, 20)
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel("EMF Reading")
                         .accessibilityValue("\(UnitConverter.formatValue(viewModel.displayValue, unit: viewModel.selectedUnit)) \(viewModel.selectedUnit.accessibilityName)")
@@ -78,7 +77,7 @@ struct MainView: View {
                             onRecordTap: { toggleRecording() },
                             onUpgradeNeeded: { showUpgradePrompt = true }
                         )
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 16)
 
                         Spacer()
 
