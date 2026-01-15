@@ -11,6 +11,14 @@ struct SettingsView: View {
 
     @Environment(\.dismiss) private var dismiss
 
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+    }
+
+    private var buildNumber: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+    }
+
     var body: some View {
         NavigationView {
             List {
@@ -75,6 +83,18 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 } header: {
                     Text("Disclaimer")
+                }
+
+                // Version info
+                Section {
+                    HStack {
+                        Spacer()
+                        Text("Version \(appVersion) (\(buildNumber))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    .listRowBackground(Color.clear)
                 }
             }
             .navigationTitle("Settings")

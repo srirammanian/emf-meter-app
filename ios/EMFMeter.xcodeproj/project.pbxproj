@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		00619F13F4B531D9F4E5120A /* EMFMeterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE54EB322698AF4BFD17C804 /* EMFMeterApp.swift */; };
 		1A2B3C4D5E6F7A8B9C0D1E2F /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3C4D5E6F7A8B9C0D1E2F3A /* AppIconView.swift */; };
+		1B3C4D5E6F7A8B9C0D1E2F3B /* LaunchScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4D5E6F7A8B9C0D1E2F3A4B /* LaunchScreenView.swift */; };
 		285BBE288C2E8211F78EC9B4 /* AnalogMeterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBE27F45D5922C55001FC67 /* AnalogMeterView.swift */; };
 		3C4D5E6F7A8B9C0D1E2F3A4B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4D5E6F7A8B9C0D1E2F3A4B5C /* Assets.xcassets */; };
 		410B1189B8B7C35DA1FB2B28 /* NeedlePhysicsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68809D587FBC4C0CD45E3655 /* NeedlePhysicsEngine.swift */; };
@@ -37,6 +38,7 @@
 		1EB2FCE81DFCB3FAC72CFC66 /* EMFMeter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EMFMeter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27FF3A82779588DB9328B1DA /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		2B3C4D5E6F7A8B9C0D1E2F3A /* AppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconView.swift; sourceTree = "<group>"; };
+		2C4D5E6F7A8B9C0D1E2F3A4B /* LaunchScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenView.swift; sourceTree = "<group>"; };
 		4CBE27F45D5922C55001FC67 /* AnalogMeterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalogMeterView.swift; sourceTree = "<group>"; };
 		4D5E6F7A8B9C0D1E2F3A4B5C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		59A075E4D9130B882E96A16C /* AudioService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioService.swift; sourceTree = "<group>"; };
@@ -82,6 +84,7 @@
 				2B3C4D5E6F7A8B9C0D1E2F3A /* AppIconView.swift */,
 				A975F44B931E140E5F0E6CC9 /* ControlButtonsView.swift */,
 				9AE03C3D9A6DC2BFD8CD78B3 /* DigitalDisplayView.swift */,
+				2C4D5E6F7A8B9C0D1E2F3A4B /* LaunchScreenView.swift */,
 				E2908F4CE2F100537A238902 /* ModeToggleView.swift */,
 			);
 			path = Components;
@@ -263,6 +266,7 @@
 			files = (
 				285BBE288C2E8211F78EC9B4 /* AnalogMeterView.swift in Sources */,
 				1A2B3C4D5E6F7A8B9C0D1E2F /* AppIconView.swift in Sources */,
+				1B3C4D5E6F7A8B9C0D1E2F3B /* LaunchScreenView.swift in Sources */,
 				B5296321D73FCCD638CEABB8 /* AudioService.swift in Sources */,
 				C8DE9BFDED451BACB450CAB4 /* Colors.swift in Sources */,
 				F6098BED076EBFBC63F9D068 /* ControlButtonsView.swift in Sources */,
