@@ -24,13 +24,13 @@ struct RecordButtonView: View {
                                 endPoint: .bottomTrailing
                             )
                         )
-                        .frame(width: 64, height: 64)
-                        .shadow(color: .black.opacity(0.5), radius: 4, y: 2)
+                        .frame(width: 50, height: 50)
+                        .shadow(color: .black.opacity(0.5), radius: 3, y: 2)
 
                     // Inner depression/socket
                     Circle()
                         .fill(Color(hex: "1A1A1A"))
-                        .frame(width: 54, height: 54)
+                        .frame(width: 42, height: 42)
                         .offset(y: isPressed ? 2 : 0)
 
                     // Red button surface with 3D effect
@@ -42,14 +42,14 @@ struct RecordButtonView: View {
                                     : [.recordButtonRed, .recordButtonRedDark],
                                 center: UnitPoint(x: 0.3, y: 0.3),
                                 startRadius: 0,
-                                endRadius: 25
+                                endRadius: 18
                             )
                         )
-                        .frame(width: 46, height: 46)
+                        .frame(width: 36, height: 36)
                         .offset(y: isPressed ? 3 : 0)
                         .shadow(
                             color: isRecording ? .recordButtonRedBright.opacity(0.5) : .black.opacity(0.4),
-                            radius: isPressed ? 1 : 3,
+                            radius: isPressed ? 1 : 2,
                             y: isPressed ? 1 : 2
                         )
 
@@ -62,14 +62,14 @@ struct RecordButtonView: View {
                                 endPoint: .center
                             )
                         )
-                        .frame(width: 46, height: 46)
+                        .frame(width: 36, height: 36)
                         .offset(y: isPressed ? 3 : 0)
 
                     // Recording indicator light (blinking dot)
                     if isRecording {
                         Circle()
                             .fill(Color.white)
-                            .frame(width: 8, height: 8)
+                            .frame(width: 6, height: 6)
                             .offset(y: isPressed ? 3 : 0)
                             .opacity(blinkOpacity)
                             .onAppear {
@@ -86,11 +86,11 @@ struct RecordButtonView: View {
                     if !isProUser {
                         Circle()
                             .fill(Color.black.opacity(0.5))
-                            .frame(width: 46, height: 46)
+                            .frame(width: 36, height: 36)
                             .offset(y: isPressed ? 3 : 0)
 
                         Image(systemName: "lock.fill")
-                            .font(.system(size: 16))
+                            .font(.system(size: 12))
                             .foregroundColor(.white.opacity(0.8))
                             .offset(y: isPressed ? 3 : 0)
                     }

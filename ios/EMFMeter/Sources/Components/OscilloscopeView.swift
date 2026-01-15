@@ -18,13 +18,60 @@ struct OscilloscopeView: View {
                 if isProUser {
                     // Full oscilloscope for Pro users
                     oscilloscopeContent(in: geometry.size)
+                    // Axis labels overlay
+                    axisLabels(in: geometry.size)
                 } else {
                     // Locked view for free users
                     lockedView(in: geometry.size)
                 }
             }
         }
-        .aspectRatio(2.5, contentMode: .fit)
+        .aspectRatio(3.0, contentMode: .fit)
+    }
+
+    // MARK: - Axis Labels
+
+    @ViewBuilder
+    private func axisLabels(in size: CGSize) -> some View {
+        let padding: CGFloat = 12
+
+        ZStack {
+            // Y-axis labels (magnitude)
+            VStack {
+                Text("\(Int(maxValue))")
+                    .font(.system(size: 8, weight: .medium, design: .monospaced))
+                    .foregroundColor(.oscilloscopeTrace.opacity(0.7))
+                Spacer()
+                Text("\(Int(maxValue / 2))")
+                    .font(.system(size: 8, weight: .medium, design: .monospaced))
+                    .foregroundColor(.oscilloscopeTrace.opacity(0.7))
+                Spacer()
+                Text("0")
+                    .font(.system(size: 8, weight: .medium, design: .monospaced))
+                    .foregroundColor(.oscilloscopeTrace.opacity(0.7))
+            }
+            .padding(.vertical, padding + 2)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, padding + 2)
+
+            // X-axis labels (time)
+            HStack {
+                Text("-30s")
+                    .font(.system(size: 8, weight: .medium, design: .monospaced))
+                    .foregroundColor(.oscilloscopeTrace.opacity(0.7))
+                Spacer()
+                Text("-15s")
+                    .font(.system(size: 8, weight: .medium, design: .monospaced))
+                    .foregroundColor(.oscilloscopeTrace.opacity(0.7))
+                Spacer()
+                Text("0s")
+                    .font(.system(size: 8, weight: .medium, design: .monospaced))
+                    .foregroundColor(.oscilloscopeTrace.opacity(0.7))
+            }
+            .padding(.horizontal, padding + 12)
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .padding(.bottom, padding - 2)
+        }
     }
 
     // MARK: - Oscilloscope Content
