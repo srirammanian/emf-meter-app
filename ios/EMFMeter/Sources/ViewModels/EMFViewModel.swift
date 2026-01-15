@@ -167,7 +167,7 @@ class EMFViewModel: ObservableObject {
         let magnitude = calibrated.magnitude
         let normalized = min(max(magnitude / MeterConfig.maxValueUT, 0), 1)
 
-        currentReading = reading  // Expose raw reading for recording
+        currentReading = calibrated  // Expose calibrated reading for recording/oscilloscope
         processedReading = ProcessedReading(
             rawReading: reading,
             calibratedReading: calibrated,
