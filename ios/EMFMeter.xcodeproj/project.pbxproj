@@ -25,6 +25,7 @@
 		C8DE9BFDED451BACB450CAB4 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1CAF04C3E6FCF1E145A078B /* Colors.swift */; };
 		D39E39776696809E5789C2FE /* ModeToggleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2908F4CE2F100537A238902 /* ModeToggleView.swift */; };
 		D6B120232F1813D300184BC6 /* switch.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D6B120222F1813D300184BC6 /* switch.mp3 */; };
+		D7C231342F1913D400285BD7 /* push_btn.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D7C231332F1913D400285BD7 /* push_btn.mp3 */; };
 		E68846645D780A5B87CB35A9 /* SoundClickCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FD6BDB11E6BC16CDB7F1EA4 /* SoundClickCalculator.swift */; };
 		EA1D2D29B71F6EAEBAB428B7 /* EMFModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00F0E86CE38C5CFD499D72E /* EMFModels.swift */; };
 		F6098BED076EBFBC63F9D068 /* ControlButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A975F44B931E140E5F0E6CC9 /* ControlButtonsView.swift */; };
@@ -50,6 +51,7 @@
 		C1CAF04C3E6FCF1E145A078B /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		D08D6F38DC13057011BEDC34 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D6B120222F1813D300184BC6 /* switch.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = switch.mp3; sourceTree = "<group>"; };
+		D7C231332F1913D400285BD7 /* push_btn.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = push_btn.mp3; sourceTree = "<group>"; };
 		DE54EB322698AF4BFD17C804 /* EMFMeterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EMFMeterApp.swift; sourceTree = "<group>"; };
 		E2908F4CE2F100537A238902 /* ModeToggleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeToggleView.swift; sourceTree = "<group>"; };
 		F00F0E86CE38C5CFD499D72E /* EMFModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EMFModels.swift; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				D6B120222F1813D300184BC6 /* switch.mp3 */,
+				D7C231332F1913D400285BD7 /* push_btn.mp3 */,
 				7432A225A19B5D6EA5C98C6B /* geiger_click.mp3 */,
 				B3C759B09A0FC86DF0279C78 /* README.txt */,
 			);
@@ -245,6 +248,7 @@
 				3C4D5E6F7A8B9C0D1E2F3A4B /* Assets.xcassets in Resources */,
 				5E6F7A8B9C0D1E2F3A4B5C6D /* LaunchScreen.storyboard in Resources */,
 				D6B120232F1813D300184BC6 /* switch.mp3 in Resources */,
+				D7C231342F1913D400285BD7 /* push_btn.mp3 in Resources */,
 				8779047310D8863A71190CAB /* README.txt in Resources */,
 				586566C5C3AFFC8E05C73137 /* geiger_click.mp3 in Resources */,
 			);

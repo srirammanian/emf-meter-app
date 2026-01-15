@@ -12,6 +12,9 @@ class AudioService: ObservableObject {
     // Switch sound player (for UI feedback)
     private var switchPlayer: AVAudioPlayer?
 
+    // Push button sound player
+    private var pushButtonPlayer: AVAudioPlayer?
+
     @Published var isEnabled: Bool = true {
         didSet {
             if !isEnabled {
@@ -23,6 +26,7 @@ class AudioService: ObservableObject {
     init() {
         setupAudio()
         setupSwitchSound()
+        setupPushButtonSound()
     }
 
     private func setupAudio() {
@@ -62,10 +66,31 @@ class AudioService: ObservableObject {
         }
     }
 
+    private func setupPushButtonSound() {
+        guard let url = Bundle.main.url(forResource: "push_btn", withExtension: "mp3") else {
+            print("Push button audio file not found")
+            return
+        }
+
+        do {
+            pushButtonPlayer = try AVAudioPlayer(contentsOf: url)
+            pushButtonPlayer?.prepareToPlay()
+            pushButtonPlayer?.volume = 0.6
+        } catch {
+            print("Push button audio setup failed: \(error)")
+        }
+    }
+
     /// Play the switch toggle sound (always plays, regardless of isEnabled).
     func playSwitch() {
         switchPlayer?.currentTime = 0
         switchPlayer?.play()
+    }
+
+    /// Play the push button sound (always plays, regardless of isEnabled).
+    func playPushButton() {
+        pushButtonPlayer?.currentTime = 0
+        pushButtonPlayer?.play()
     }
 
     /// Check if a click should be played and play it if needed.

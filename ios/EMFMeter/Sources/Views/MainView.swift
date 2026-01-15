@@ -1,50 +1,10 @@
 import SwiftUI
 
-/// Risk level for health hazard indicator
-enum RiskLevel {
-    case safe
-    case caution
-    case danger
-
-    var color: Color {
-        switch self {
-        case .safe: return Color(hex: "4CAF50")      // Green
-        case .caution: return Color(hex: "FFC107")  // Amber/Yellow
-        case .danger: return Color(hex: "F44336")   // Red
-        }
-    }
-
-    var glowColor: Color {
-        switch self {
-        case .safe: return Color(hex: "81C784")
-        case .caution: return Color(hex: "FFD54F")
-        case .danger: return Color(hex: "E57373")
-        }
-    }
-
-    var label: String {
-        switch self {
-        case .safe: return "SAFE"
-        case .caution: return "CAUTION"
-        case .danger: return "DANGER"
-        }
-    }
-}
-
 /// Main view for the EMF Meter app - styled as vintage scientific equipment.
 struct MainView: View {
     @StateObject private var viewModel = EMFViewModel()
     @Environment(\.colorScheme) private var colorScheme
     @State private var showSafetyInfo = false
-
-    /// Calculate risk level based on needle position (0-1 normalized)
-    private func riskLevel(for position: Float) -> RiskLevel {
-        switch position {
-        case 0..<0.2: return .safe       // 0-20% of max (0-40 µT)
-        case 0.2..<0.8: return .caution  // 20-80% of max (40-160 µT)
-        default: return .danger          // 80-100% of max (160-200 µT)
-        }
-    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -57,9 +17,31 @@ struct MainView: View {
                     SensorUnavailableView()
                 } else {
                     VStack(spacing: 0) {
-                        // Embossed title plate
-                        TitlePlateView()
-                            .padding(.top, geometry.safeAreaInsets.top + 16)
+                        // Embossed title plate with info button
+                        HStack(spacing: 12) {
+                            TitlePlateView()
+
+                            // Info button
+                            Button(action: { showSafetyInfo = true }) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(hex: "3A3A32"))
+                                        .frame(width: 24, height: 24)
+                                        .shadow(color: .black.opacity(0.4), radius: 2, x: 1, y: 1)
+
+                                    Circle()
+                                        .stroke(Color(hex: "4A4A42"), lineWidth: 1)
+                                        .frame(width: 22, height: 22)
+
+                                    Text("i")
+                                        .font(.system(size: 13, weight: .semibold, design: .serif))
+                                        .italic()
+                                        .foregroundColor(Color(hex: "A0A090"))
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(.top, geometry.safeAreaInsets.top + 16)
 
                         Spacer()
 
@@ -69,13 +51,6 @@ struct MainView: View {
                             unit: viewModel.selectedUnit,
                             displayValue: viewModel.displayValue
                         )
-
-                        // Health risk indicator with info button
-                        HazardIndicatorView(
-                            riskLevel: riskLevel(for: viewModel.needlePosition),
-                            onInfoTap: { showSafetyInfo = true }
-                        )
-                        .padding(.top, 16)
 
                         Spacer()
 
@@ -256,122 +231,6 @@ private struct TitlePlateView: View {
     }
 }
 
-/// Vintage jewel indicator lamp for hazard level with info button
-private struct HazardIndicatorView: View {
-    let riskLevel: RiskLevel
-    let onInfoTap: () -> Void
-
-    var body: some View {
-        VStack(spacing: 6) {
-            // Jewel indicator lamp
-            ZStack {
-                // Outer bezel/housing
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color(hex: "4A4A42"),
-                                Color(hex: "3A3A32"),
-                                Color(hex: "2A2A22")
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .frame(width: 44, height: 44)
-                    .shadow(color: .black.opacity(0.5), radius: 3, x: 2, y: 2)
-
-                // Inner ring
-                Circle()
-                    .stroke(Color(hex: "5A5A52"), lineWidth: 2)
-                    .frame(width: 38, height: 38)
-
-                // Recessed socket
-                Circle()
-                    .fill(Color(hex: "1A1A15"))
-                    .frame(width: 32, height: 32)
-
-                // Glowing jewel dome
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [
-                                riskLevel.glowColor,
-                                riskLevel.color,
-                                riskLevel.color.opacity(0.8)
-                            ],
-                            center: .init(x: 0.35, y: 0.35),
-                            startRadius: 0,
-                            endRadius: 14
-                        )
-                    )
-                    .frame(width: 26, height: 26)
-                    .shadow(color: riskLevel.color.opacity(0.8), radius: 8, x: 0, y: 0)
-
-                // Glass highlight
-                Ellipse()
-                    .fill(
-                        LinearGradient(
-                            colors: [Color.white.opacity(0.6), Color.clear],
-                            startPoint: .top,
-                            endPoint: .center
-                        )
-                    )
-                    .frame(width: 16, height: 10)
-                    .offset(x: -2, y: -6)
-            }
-
-            // Risk label plate with info button (centered under light)
-            ZStack {
-                // Label plate (centered)
-                ZStack {
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color(hex: "2A2A25"))
-                        .frame(width: 70, height: 18)
-                        .shadow(color: .black.opacity(0.3), radius: 1, x: 1, y: 1)
-
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color(hex: "1A1A15"), Color(hex: "252520")],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .frame(width: 66, height: 14)
-
-                    Text(riskLevel.label)
-                        .font(.system(size: 9, weight: .bold))
-                        .tracking(1.5)
-                        .foregroundColor(riskLevel.color)
-                        .shadow(color: riskLevel.color.opacity(0.5), radius: 2, x: 0, y: 0)
-                }
-
-                // Info button (offset to the right)
-                Button(action: onInfoTap) {
-                    ZStack {
-                        Circle()
-                            .fill(Color(hex: "3A3A32"))
-                            .frame(width: 18, height: 18)
-                            .shadow(color: .black.opacity(0.3), radius: 1, x: 1, y: 1)
-
-                        Circle()
-                            .stroke(Color(hex: "4A4A42"), lineWidth: 1)
-                            .frame(width: 16, height: 16)
-
-                        Text("i")
-                            .font(.system(size: 10, weight: .semibold, design: .serif))
-                            .italic()
-                            .foregroundColor(Color(hex: "A0A090"))
-                    }
-                }
-                .buttonStyle(.plain)
-                .offset(x: 47)
-            }
-        }
-    }
-}
-
 /// Corner rivets for the device
 private struct CornerRivetsView: View {
     var body: some View {
@@ -496,7 +355,7 @@ private struct VintageControlPanelView: View {
             HStack(alignment: .top, spacing: 30) {
                 // Sound toggle
                 VintageToggleSwitchView(
-                    label: "AUDIO",
+                    label: "SOUND",
                     isOn: soundEnabled,
                     onColor: Color(hex: "4CAF50"),
                     action: onSoundToggle

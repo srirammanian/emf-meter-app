@@ -38,6 +38,9 @@ struct AnalogMeterView: View {
                     // Draw aged ivory face
                     drawFace(context: context, center: center, radius: gaugeRadius * 0.85)
 
+                    // Draw colored zone backgrounds behind the scale
+                    drawZoneBackgrounds(context: context, center: center, radius: gaugeRadius * 0.85)
+
                     // Draw header text "EMF FIELD INTENSITY"
                     drawHeaderText(context: context, center: center, radius: gaugeRadius * 0.72)
 
@@ -82,16 +85,16 @@ struct AnalogMeterView: View {
                 .padding(.top, size * 0.04)
 
                 // Digital LCD display and unit label below needle
-                VStack(spacing: size * 0.01) {
+                VStack(spacing: size * 0.015) {
                     // Unit label
                     Text(unit.symbol)
-                        .font(.system(size: size * 0.035, weight: .medium))
+                        .font(.system(size: size * 0.05, weight: .medium))
                         .foregroundColor(colors.vintageScale)
 
                     // LCD-style digital value display
                     LCDDisplayView(value: formattedValue, size: size)
                 }
-                .offset(y: size * 0.22)
+                .offset(y: size * 0.16)
             }
             .frame(width: size, height: size)
             .position(x: geometry.size.width / 2, y: geometry.size.height / 2)
@@ -222,38 +225,51 @@ struct AnalogMeterView: View {
         }
     }
 
+    private func drawZoneBackgrounds(context: GraphicsContext, center: CGPoint, radius: CGFloat) {
+        let innerRadius = radius * 0.25  // Start from near center
+        let outerRadius = radius * 0.95  // Extend to near edge of face
+
+        // In Core Graphics, 270° is UP (12 o'clock), 180° is LEFT, 0°/360° is RIGHT
+        // Scale goes: 0% at 180° (left) → 50% at 270° (up) → 100% at 360° (right)
+        // Going counter-clockwise from 180° through 270° to 360°
+
+        // Green zone - safe (0-50%): 180° to 270° (left to top)
+        var greenPath = Path()
+        greenPath.addArc(center: center, radius: innerRadius, startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
+        greenPath.addArc(center: center, radius: outerRadius, startAngle: .degrees(270), endAngle: .degrees(180), clockwise: true)
+        greenPath.closeSubpath()
+        context.fill(greenPath, with: .color(Color(hex: "4A7C59").opacity(0.25)))
+
+        // Yellow zone - caution (50-80%): 270° to 324° (top to upper-right)
+        var yellowPath = Path()
+        yellowPath.addArc(center: center, radius: innerRadius, startAngle: .degrees(270), endAngle: .degrees(324), clockwise: false)
+        yellowPath.addArc(center: center, radius: outerRadius, startAngle: .degrees(324), endAngle: .degrees(270), clockwise: true)
+        yellowPath.closeSubpath()
+        context.fill(yellowPath, with: .color(Color(hex: "C9A227").opacity(0.25)))
+
+        // Red zone - danger (80-100%): 324° to 360° (upper-right to right)
+        var redPath = Path()
+        redPath.addArc(center: center, radius: innerRadius, startAngle: .degrees(324), endAngle: .degrees(360), clockwise: false)
+        redPath.addArc(center: center, radius: outerRadius, startAngle: .degrees(360), endAngle: .degrees(324), clockwise: true)
+        redPath.closeSubpath()
+        context.fill(redPath, with: .color(Color(hex: "C44536").opacity(0.25)))
+    }
+
     private func drawBlueArc(context: GraphicsContext, center: CGPoint, radius: CGFloat) {
         let arcWidth: CGFloat = radius * 0.12
 
-        // Main blue arc - full 180 degrees
-        var bluePath = Path()
-        bluePath.addArc(
+        // Single color arc
+        var arcPath = Path()
+        arcPath.addArc(
             center: center,
             radius: radius,
             startAngle: .degrees(180),
             endAngle: .degrees(0),
             clockwise: true
         )
-
         context.stroke(
-            bluePath,
+            arcPath,
             with: .color(colors.vintageArc),
-            style: StrokeStyle(lineWidth: arcWidth, lineCap: .butt)
-        )
-
-        // Danger zone - last 20% in red
-        var dangerPath = Path()
-        dangerPath.addArc(
-            center: center,
-            radius: radius,
-            startAngle: .degrees(36),
-            endAngle: .degrees(0),
-            clockwise: true
-        )
-
-        context.stroke(
-            dangerPath,
-            with: .color(Color(hex: "C44536").opacity(0.8)),
             style: StrokeStyle(lineWidth: arcWidth, lineCap: .butt)
         )
 
@@ -570,17 +586,17 @@ private struct LCDDisplayView: View {
     private let lcdBezel = Color(hex: "2A2A2A")
 
     var body: some View {
-        let displayWidth = size * 0.28
-        let displayHeight = size * 0.08
+        let displayWidth = size * 0.38
+        let displayHeight = size * 0.11
 
         ZStack {
             // Outer bezel
-            RoundedRectangle(cornerRadius: 4)
+            RoundedRectangle(cornerRadius: 5)
                 .fill(lcdBezel)
-                .frame(width: displayWidth + 6, height: displayHeight + 6)
+                .frame(width: displayWidth + 8, height: displayHeight + 8)
 
             // LCD screen background with inset effect
-            RoundedRectangle(cornerRadius: 3)
+            RoundedRectangle(cornerRadius: 4)
                 .fill(
                     LinearGradient(
                         colors: [lcdShadow, lcdBackground, lcdBackground],
@@ -590,20 +606,20 @@ private struct LCDDisplayView: View {
                 )
                 .frame(width: displayWidth, height: displayHeight)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 3)
+                    RoundedRectangle(cornerRadius: 4)
                         .stroke(Color.black.opacity(0.5), lineWidth: 1)
                 )
 
             // Ghost segments (dimmed background)
             Text("8888.8")
-                .font(.custom("Menlo", size: size * 0.045))
+                .font(.custom("Menlo", size: size * 0.06))
                 .fontWeight(.bold)
                 .foregroundColor(lcdText.opacity(0.1))
                 .frame(width: displayWidth, height: displayHeight)
 
             // Active LCD digits
             Text(value)
-                .font(.custom("Menlo", size: size * 0.045))
+                .font(.custom("Menlo", size: size * 0.06))
                 .fontWeight(.bold)
                 .foregroundColor(lcdText)
                 .shadow(color: lcdText.opacity(0.5), radius: 2, x: 0, y: 0)

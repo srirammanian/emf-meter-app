@@ -199,6 +199,7 @@ class EMFViewModel: ObservableObject {
     }
 
     func calibrate() {
+        audioService.playPushButton()
         guard let reading = magnetometerService.currentReading else { return }
 
         calibrationData = CalibrationData.from(reading: reading)
