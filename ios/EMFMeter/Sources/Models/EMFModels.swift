@@ -48,6 +48,15 @@ enum EMFUnit: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Full name for VoiceOver accessibility
+    var accessibilityName: String {
+        switch self {
+        case .microTesla: return "microtesla"
+        case .milliGauss: return "milligauss"
+        case .gauss: return "gauss"
+        }
+    }
+
     /// Convert a value from microtesla to this unit.
     func fromMicroTesla(_ value: Float) -> Float {
         switch self {

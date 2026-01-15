@@ -9,9 +9,10 @@ struct MainView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Skeuomorphic metallic device background
+                // Skeuomorphic metallic device background (decorative)
                 MetallicDeviceBackground()
                     .ignoresSafeArea()
+                    .accessibilityHidden(true)
 
                 if !viewModel.sensorAvailable {
                     SensorUnavailableView()
@@ -40,6 +41,8 @@ struct MainView: View {
                                 }
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel("Information")
+                            .accessibilityHint("Shows safety information and guidelines about EMF readings")
                         }
                         .padding(.top, geometry.safeAreaInsets.top + 16)
 
@@ -51,6 +54,10 @@ struct MainView: View {
                             unit: viewModel.selectedUnit,
                             displayValue: viewModel.displayValue
                         )
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("EMF Reading")
+                        .accessibilityValue("\(UnitConverter.formatValue(viewModel.displayValue, unit: viewModel.selectedUnit)) \(viewModel.selectedUnit.accessibilityName)")
+                        .accessibilityAddTraits(.updatesFrequently)
 
                         Spacer()
 
@@ -66,9 +73,10 @@ struct MainView: View {
                     }
                 }
 
-                // Corner rivets
+                // Corner rivets (decorative)
                 CornerRivetsView()
                     .ignoresSafeArea()
+                    .accessibilityHidden(true)
             }
         }
         .sheet(isPresented: $viewModel.showSettings) {
@@ -228,6 +236,9 @@ private struct TitlePlateView: View {
                 .foregroundColor(Color(hex: "C0C0B0"))
                 .shadow(color: .black.opacity(0.8), radius: 0, x: 0, y: 1)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("EMF Scope")
+        .accessibilityAddTraits(.isHeader)
     }
 }
 
@@ -473,6 +484,9 @@ private struct VintageToggleSwitchView: View {
                 }
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("\(label) toggle")
+            .accessibilityValue(isOn ? "On" : "Off")
+            .accessibilityHint("Double tap to turn \(label.lowercased()) \(isOn ? "off" : "on")")
 
             // Status indicator to match other controls
             HStack(spacing: 4) {
@@ -561,6 +575,9 @@ private struct VintagePushButtonView: View {
             .onLongPressGesture(minimumDuration: 0, pressing: { pressing in
                 isPressed = pressing
             }, perform: {})
+            .accessibilityLabel("Zero calibration button")
+            .accessibilityValue(isActive ? "Calibrated" : "Not calibrated")
+            .accessibilityHint("Double tap to calibrate the meter to zero at current position")
 
             // Status indicator
             HStack(spacing: 4) {
@@ -646,6 +663,8 @@ private struct VintageDialButtonView: View {
                 }
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("Settings")
+            .accessibilityHint("Double tap to open settings for unit selection, theme, and calibration")
 
             // Spacer to align with other controls
             Spacer()
@@ -661,6 +680,7 @@ private struct SensorUnavailableView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 48))
                 .foregroundColor(Color(hex: "C44536"))
+                .accessibilityHidden(true)
 
             Text("SENSOR OFFLINE")
                 .font(.system(size: 18, weight: .bold, design: .serif))
@@ -677,6 +697,8 @@ private struct SensorUnavailableView: View {
                 .fill(Color(hex: "3A3A32"))
                 .shadow(color: .black.opacity(0.4), radius: 4, x: 2, y: 2)
         )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Sensor offline. Magnetometer not available on this device.")
     }
 }
 
