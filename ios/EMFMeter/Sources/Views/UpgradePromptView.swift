@@ -140,6 +140,18 @@ struct UpgradePromptView: View {
             } else if storeManager.purchaseState == .loading {
                 ProgressView()
                     .frame(height: 50)
+            } else {
+                // Show mock price on simulator or when product unavailable
+                #if targetEnvironment(simulator)
+                VStack(spacing: 4) {
+                    Text("$2.99")
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
+
+                    Text("One-time purchase")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                #endif
             }
 
             // Error message
@@ -171,7 +183,11 @@ struct UpgradePromptView: View {
                 .foregroundColor(.white)
                 .cornerRadius(12)
             }
+            #if targetEnvironment(simulator)
+            .disabled(storeManager.purchaseState == .purchasing)
+            #else
             .disabled(storeManager.purchaseState == .purchasing || storeManager.proProduct == nil)
+            #endif
 
             // Restore purchases
             Button("Restore Purchases") {
