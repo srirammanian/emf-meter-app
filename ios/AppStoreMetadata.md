@@ -67,8 +67,8 @@ Initial release featuring vintage analog meter design, real-time EMF detection, 
 | Secondary Category | Education |
 | Age Rating | 4+ |
 | Copyright | © 2025 |
-| Support URL | (add your support URL) |
-| Privacy Policy URL | (add your privacy policy URL) |
+| Support URL | https://github.com/srirammanian/emf-meter-app/issues |
+| Privacy Policy URL | https://srirammanian.github.io/emf-meter-app/privacy.html |
 
 ---
 
