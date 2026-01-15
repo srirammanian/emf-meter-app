@@ -1,6 +1,6 @@
 # EMF Meter App - Product Requirements Document
 
-**Version:** 1.0
+**Version:** 2.0
 **Last Updated:** January 2026
 **Status:** Draft
 
@@ -8,7 +8,9 @@
 
 ## 1. Executive Summary
 
-EMF Meter is a cross-platform mobile application that transforms smartphones into electromagnetic field (EMF) detectors using the device's built-in magnetometer. The app features two distinct visualization modes: a classic analog Geiger counter-style meter and a digital calculator-style display, appealing to both hobbyists and users seeking a nostalgic scientific instrument experience.
+EMF Meter is a mobile application that transforms smartphones into electromagnetic field (EMF) detectors using the device's built-in magnetometer. The app features a classic analog Geiger counter-style meter with authentic vintage aesthetics, appealing to hobbyists and users seeking a nostalgic scientific instrument experience.
+
+**V2.0** introduces Pro features including session recording, a real-time oscilloscope graph, data export, and session history—available via a one-time in-app purchase.
 
 ---
 
@@ -51,34 +53,28 @@ Create an authentic, visually compelling EMF measurement tool that combines the 
 | Update Rate | Minimum 30Hz sampling, 60Hz display refresh |
 | Accuracy | Limited by device sensor capabilities |
 
-### 5.2 Display Modes
+### 5.2 Display Mode
 
-#### 5.2.1 Analog Mode
-- **Visual Style:** Classic Geiger counter / scientific instrument aesthetic
+#### 5.2.1 Analog Meter
+- **Visual Style:** Vintage 1950s Geiger counter / scientific instrument aesthetic
 - **Meter Design:**
-  - Semi-circular arc scale (approximately 90-120 degrees)
+  - Circular gauge with thick black bezel
+  - Cream/ivory aged face with subtle texture
+  - Semi-circular arc scale (180 degrees)
   - Scale starting at 0 on the left, maximum on the right
   - Vintage-style numbering and tick marks
-  - Rotating needle/arrow indicator
+  - Blue arc band for scale markings
+  - "EMF FIELD INTENSITY" header text
+  - Center badge with decorative brass corner screws
 - **Needle Physics:**
   - Realistic inertia and damping
   - Slight overshoot on rapid changes
   - Natural "jumpy" behavior mimicking real analog meters
 - **Visual Elements:**
-  - Aged/textured bezel
-  - Glass reflection effect (subtle)
-  - Worn label aesthetics
-
-#### 5.2.2 Digital Mode
-- **Visual Style:** Classic LCD calculator display
-- **Display:**
-  - 7-segment style digits
-  - Large, easily readable numbers
-  - Unit indicator
-- **Visual Elements:**
-  - LCD segment "shadow" effect (showing inactive segments)
-  - Slight LCD pixel texture
-  - Retro digital frame/housing
+  - Thick 3D bezel with depth effect
+  - Aged ivory face with radial gradient
+  - Black mechanical pointer needle
+  - Dome-style pivot with highlight
 
 ### 5.3 Unit System
 | Unit | Symbol | Conversion | Default |
@@ -129,19 +125,19 @@ Create an authentic, visually compelling EMF measurement tool that combines the 
 ### 6.1 Main Screen Layout
 ```
 ┌─────────────────────────────────┐
-│  [Settings]     EMF METER  [?]  │
+│  [Settings]   EMF SCOPE    [?]  │
 │─────────────────────────────────│
 │                                 │
 │     ┌─────────────────────┐     │
-│     │                     │     │
-│     │   METER DISPLAY     │     │
-│     │   (Analog/Digital)  │     │
-│     │                     │     │
+│     │   VINTAGE ANALOG    │     │
+│     │      METER          │     │
+│     │   [REC]             │     │
 │     └─────────────────────┘     │
 │                                 │
-│         123.4 mG                │
-│                                 │
-│  [Analog] ──●── [Digital]       │
+│     ┌─────────────────────┐     │
+│     │   OSCILLOSCOPE      │     │  ← Pro Feature
+│     │   (Live Graph)      │     │
+│     └─────────────────────┘     │
 │                                 │
 │  [🔊 Sound]    [⚖ Calibrate]    │
 │                                 │
@@ -151,16 +147,19 @@ Create an authentic, visually compelling EMF measurement tool that combines the 
 ### 6.2 Navigation
 - **Single Screen App:** No complex navigation required
 - **Settings:** Modal/sheet presentation
-- **Mode Toggle:** Segmented control or animated switch
+- **History:** Accessible from Settings (Pro feature)
 
 ### 6.3 Settings Screen
 - Unit selection (mG / µT / G)
 - Theme selection (Light / Dark / System)
 - Sound toggle
 - Calibration management
+- **Recording History** (Pro feature)
+- Background recording duration setting (Pro feature)
 - About / Credits
 - Rate App link
 - Privacy Policy link
+- **Restore Purchases**
 
 ---
 
@@ -180,31 +179,146 @@ Create an authentic, visually compelling EMF measurement tool that combines the 
 
 ---
 
-## 8. Future Features (V2)
+## 8. Pro Features (V2)
 
-| Feature | Description | Monetization |
-|---------|-------------|--------------|
-| Data Logging | Record readings over time | Premium |
-| Peak Hold | Display maximum reading since reset | Premium |
-| Min/Max Tracking | Show range of readings | Premium |
-| Export Data | CSV/PDF export of logs | Premium |
-| Graphs | Real-time graph of readings | Premium |
-| Ad Removal | Remove advertisements | Premium |
-| Widgets | Home screen widgets | Premium |
+### 8.1 Session Recording
+
+| Requirement | Description |
+|-------------|-------------|
+| Trigger | Manual start/stop via dedicated record button |
+| Record Button | Large red button next to analog dial, built-in vintage look with depressed/pushable styling |
+| Visual Feedback | Button shows pressed state while recording; recording indicator on screen |
+| Data Captured | Timestamp + X/Y/Z readings + magnitude at sensor sample rate (30Hz) |
+| Background Recording | Continues when app is backgrounded |
+| Background Duration | Default 1 hour, user-configurable up to 3 hours in Settings |
+| Storage | Local device storage only |
+| Session Limit | Unlimited sessions |
+| Deletion | Manual delete only (no auto-cleanup) |
+
+### 8.2 Session Metadata
+
+| Field | Description |
+|-------|-------------|
+| Session ID | Unique identifier (UUID) |
+| Start Time | Timestamp when recording began |
+| End Time | Timestamp when recording ended |
+| Duration | Calculated from start/end |
+| Reading Count | Number of data points captured |
+| Name | User-editable session name (optional) |
+| Notes | User-editable notes field (optional) |
+| Min/Max/Avg | Calculated statistics for the session |
+
+### 8.3 Live Oscilloscope Graph
+
+| Requirement | Description |
+|-------------|-------------|
+| Visual Style | 1950s CRT oscilloscope aesthetic |
+| Position | Below analog dial, above control panel |
+| Display Window | Last 30 seconds of readings visible |
+| Scrolling | Drag horizontally to scroll back through session history |
+| CRT Effects | Green phosphor glow, scan lines, slight blur |
+| Grid | Oscilloscope-style graticule/grid lines |
+| Y-Axis | EMF magnitude (0 to max range) |
+| X-Axis | Time (scrollable) |
+| Update Rate | Real-time at display refresh rate (60Hz) |
+
+### 8.4 Session History
+
+| Requirement | Description |
+|-------------|-------------|
+| Access | Button in Settings screen |
+| List View | Simple list showing session date, duration, and name |
+| Sorting | Most recent first |
+| Selection | Tap to view session details |
+| Detail View | Full session info with option to edit name/notes |
+| Playback | View recorded data in oscilloscope graph |
+| Delete | Swipe to delete individual sessions |
+| Bulk Delete | Option to delete all sessions |
+
+### 8.5 Data Export
+
+| Requirement | Description |
+|-------------|-------------|
+| Format | CSV (Comma-Separated Values) |
+| Columns | Timestamp, X, Y, Z, Magnitude, Unit |
+| Header Row | Column names included |
+| Filename | `EMF_Session_YYYY-MM-DD_HHMMSS.csv` |
+| Sharing | iOS system share sheet |
+| Export From | Session detail view |
+
+### 8.6 Record Button Design
+
+```
+┌──────────────────────────────────────┐
+│                                      │
+│    ┌────────────────────────┐        │
+│    │     ANALOG METER       │        │
+│    │                        │   ●    │  ← Red REC button
+│    │                        │  REC   │    (large, depressed look)
+│    │                        │        │
+│    └────────────────────────┘        │
+│                                      │
+│    ┌────────────────────────┐        │
+│    │    OSCILLOSCOPE        │        │
+│    └────────────────────────┘        │
+│                                      │
+└──────────────────────────────────────┘
+```
 
 ---
 
 ## 9. Monetization Strategy (V2)
 
 ### 9.1 Free Tier
-- Full V1 functionality
-- Advertisement supported (banner ads)
-- Standard features
+- Full analog meter functionality
+- Sound feedback (Geiger clicks)
+- Calibration
+- Unit switching
+- Theme support
+- **No advertisements**
 
-### 9.2 Premium Tier
-- All V2 features
-- Ad-free experience
-- One-time purchase or subscription TBD
+### 9.2 Pro Tier (One-Time Purchase: $2.99)
+
+| Feature | Free | Pro |
+|---------|------|-----|
+| Analog Meter | ✓ | ✓ |
+| Sound Feedback | ✓ | ✓ |
+| Calibration | ✓ | ✓ |
+| Unit Selection | ✓ | ✓ |
+| Themes | ✓ | ✓ |
+| Oscilloscope Graph | ✗ | ✓ |
+| Session Recording | ✗ | ✓ |
+| Session History | ✗ | ✓ |
+| Data Export (CSV) | ✗ | ✓ |
+| Background Recording | ✗ | ✓ |
+
+### 9.3 Purchase Implementation
+
+| Requirement | Description |
+|-------------|-------------|
+| Framework | StoreKit 2 (iOS 15+) |
+| Product Type | Non-consumable (one-time purchase) |
+| Product ID | `com.emfmeter.pro` |
+| Price | $2.99 USD |
+| Restore Purchases | Available in Settings |
+| Free Trial | Promotional offer support via StoreKit 2 |
+| Paywall Type | Hard paywall (Pro features locked until purchase) |
+
+### 9.4 Upgrade Prompt
+
+| Trigger | Behavior |
+|---------|----------|
+| Tap Record Button (free user) | Show upgrade modal |
+| Tap Oscilloscope area (free user) | Show upgrade modal |
+| Tap History in Settings (free user) | Show upgrade modal |
+
+**Upgrade Modal Content:**
+- Feature preview with screenshots/animations
+- List of Pro features
+- Price display ($2.99)
+- "Upgrade to Pro" button
+- "Restore Purchases" link
+- Close/dismiss option
 
 ---
 
@@ -216,7 +330,10 @@ Create an authentic, visually compelling EMF measurement tool that combines the 
 | Crash-free Rate | 99.5%+ |
 | Daily Active Users | Track growth |
 | Session Duration | 2+ minutes average |
-| Premium Conversion | Track for V2 |
+| Pro Conversion Rate | 5%+ of active users |
+| Pro Revenue | Track monthly |
+| Recording Sessions/User | Track engagement |
+| Export Usage | Track feature adoption |
 
 ---
 
