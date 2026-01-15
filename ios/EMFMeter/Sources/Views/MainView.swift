@@ -53,44 +53,30 @@ struct MainView: View {
 
                         Spacer()
 
-                        // Analog meter with record button
-                        HStack(alignment: .center, spacing: 16) {
-                            Spacer()
-
-                            // Analog meter display
-                            AnalogMeterView(
-                                needlePosition: viewModel.needlePosition,
-                                unit: viewModel.selectedUnit,
-                                displayValue: viewModel.displayValue
-                            )
-                            .accessibilityElement(children: .ignore)
-                            .accessibilityLabel("EMF Reading")
-                            .accessibilityValue("\(UnitConverter.formatValue(viewModel.displayValue, unit: viewModel.selectedUnit)) \(viewModel.selectedUnit.accessibilityName)")
-                            .accessibilityAddTraits(.updatesFrequently)
-
-                            // Record button next to meter
-                            RecordButtonView(
-                                isRecording: recordingService.isRecording,
-                                isProUser: storeManager.isProUnlocked,
-                                duration: recordingService.isRecording ? recordingService.formattedDuration : nil,
-                                onTap: { toggleRecording() },
-                                onUpgradeNeeded: { showUpgradePrompt = true }
-                            )
-
-                            Spacer()
-                        }
+                        // Analog meter display (centered)
+                        AnalogMeterView(
+                            needlePosition: viewModel.needlePosition,
+                            unit: viewModel.selectedUnit,
+                            displayValue: viewModel.displayValue
+                        )
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("EMF Reading")
+                        .accessibilityValue("\(UnitConverter.formatValue(viewModel.displayValue, unit: viewModel.selectedUnit)) \(viewModel.selectedUnit.accessibilityName)")
+                        .accessibilityAddTraits(.updatesFrequently)
 
                         Spacer()
-                            .frame(height: 12)
+                            .frame(height: 16)
 
-                        // Oscilloscope graph (Pro feature)
-                        OscilloscopeView(
+                        // Recording panel: Oscilloscope + Record button (Pro features)
+                        RecordingPanelView(
                             readings: recordingService.liveReadings,
                             maxValue: MeterConfig.maxValueUT,
+                            isRecording: recordingService.isRecording,
                             isProUser: storeManager.isProUnlocked,
+                            duration: recordingService.isRecording ? recordingService.formattedDuration : nil,
+                            onRecordTap: { toggleRecording() },
                             onUpgradeNeeded: { showUpgradePrompt = true }
                         )
-                        .frame(height: 100)
                         .padding(.horizontal, 20)
 
                         Spacer()
@@ -739,6 +725,71 @@ private struct VintageDialButtonView: View {
             Spacer()
                 .frame(width: 36, height: 10)
         }
+    }
+}
+
+/// Combined recording panel with oscilloscope and record button
+private struct RecordingPanelView: View {
+    let readings: [TimestampedReading]
+    let maxValue: Float
+    let isRecording: Bool
+    let isProUser: Bool
+    let duration: String?
+    let onRecordTap: () -> Void
+    let onUpgradeNeeded: () -> Void
+
+    var body: some View {
+        ZStack {
+            // Panel background
+            RoundedRectangle(cornerRadius: 12)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(hex: "3A3A32"),
+                            Color(hex: "2A2A25")
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .shadow(color: .black.opacity(0.5), radius: 4, x: 2, y: 3)
+
+            // Panel border
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.1),
+                            Color.black.opacity(0.3)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 1
+                )
+
+            HStack(spacing: 12) {
+                // Oscilloscope display
+                OscilloscopeView(
+                    readings: readings,
+                    maxValue: maxValue,
+                    isProUser: isProUser,
+                    onUpgradeNeeded: onUpgradeNeeded
+                )
+                .frame(height: 90)
+
+                // Record button
+                RecordButtonView(
+                    isRecording: isRecording,
+                    isProUser: isProUser,
+                    duration: duration,
+                    onTap: onRecordTap,
+                    onUpgradeNeeded: onUpgradeNeeded
+                )
+            }
+            .padding(10)
+        }
+        .frame(height: 110)
     }
 }
 
