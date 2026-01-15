@@ -192,11 +192,33 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* Increment Build Number */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Increment Build Number";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Auto-increment build number\nif [ \"$CONFIGURATION\" == \"Release\" ]; then\n    PLIST=\"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n    BUILD_NUMBER=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"$PLIST\")\n    BUILD_NUMBER=$((BUILD_NUMBER + 1))\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $BUILD_NUMBER\" \"$PLIST\"\n    echo \"Build number incremented to $BUILD_NUMBER\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		B7B21BD2B81BFE1F18D9DBB9 /* EMFMeter */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1A28B9F1B58D7FB95B2F3E71 /* Build configuration list for PBXNativeTarget "EMFMeter" */;
 			buildPhases = (
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* Increment Build Number */,
 				B4B273D7B719C568B7CFAD67 /* Sources */,
 				B8E11E50AA15ADF93AE29C49 /* Resources */,
 			);
