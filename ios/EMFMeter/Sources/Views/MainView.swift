@@ -59,6 +59,7 @@ struct MainView: View {
                             unit: viewModel.selectedUnit,
                             displayValue: viewModel.displayValue
                         )
+                        .padding(.horizontal, 20)
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel("EMF Reading")
                         .accessibilityValue("\(UnitConverter.formatValue(viewModel.displayValue, unit: viewModel.selectedUnit)) \(viewModel.selectedUnit.accessibilityName)")
