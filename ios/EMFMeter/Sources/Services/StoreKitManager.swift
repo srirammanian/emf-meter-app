@@ -7,6 +7,9 @@ class StoreKitManager: ObservableObject {
     // MARK: - Constants
     static let proProductId = "com.emfmeter.pro"
 
+    /// Enable testing mode to bypass StoreKit (set to false for production release)
+    static let testingModeEnabled = false
+
     // MARK: - Published State
     @Published private(set) var isProUnlocked: Bool = false
     @Published private(set) var proProduct: Product?
@@ -23,25 +26,17 @@ class StoreKitManager: ObservableObject {
 
     // MARK: - Private
     private var updateListenerTask: Task<Void, Error>?
-
-    /// Check if running on simulator
-    private var isSimulator: Bool {
-        #if targetEnvironment(simulator)
-        return true
-        #else
-        return false
-        #endif
-    }
+    private static let testingProUnlockedKey = "testing_pro_unlocked"
 
     // MARK: - Initialization
 
     init() {
-        // Check for simulator Pro unlock
-        #if targetEnvironment(simulator)
-        if UserDefaults.standard.bool(forKey: "simulator_pro_unlocked") {
-            isProUnlocked = true
+        // Check for testing mode Pro unlock
+        if Self.testingModeEnabled {
+            if UserDefaults.standard.bool(forKey: Self.testingProUnlockedKey) {
+                isProUnlocked = true
+            }
         }
-        #endif
 
         updateListenerTask = listenForTransactions()
 
@@ -59,17 +54,17 @@ class StoreKitManager: ObservableObject {
 
     /// Purchase the Pro upgrade.
     func purchase() async {
-        // On simulator, unlock Pro directly for testing
-        #if targetEnvironment(simulator)
-        purchaseState = .purchasing
-        // Brief delay to simulate purchase flow
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        isProUnlocked = true
-        purchaseState = .purchased
-        // Persist for simulator session
-        UserDefaults.standard.set(true, forKey: "simulator_pro_unlocked")
-        return
-        #endif
+        // In testing mode, unlock Pro directly without StoreKit
+        if Self.testingModeEnabled {
+            purchaseState = .purchasing
+            // Brief delay to simulate purchase flow
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            isProUnlocked = true
+            purchaseState = .purchased
+            // Persist for testing session
+            UserDefaults.standard.set(true, forKey: Self.testingProUnlockedKey)
+            return
+        }
 
         guard let product = proProduct else {
             errorMessage = "Product not available"
@@ -144,13 +139,13 @@ class StoreKitManager: ObservableObject {
     }
 
     private func updatePurchaseStatus() async {
-        // On simulator, check UserDefaults
-        #if targetEnvironment(simulator)
-        if UserDefaults.standard.bool(forKey: "simulator_pro_unlocked") {
-            isProUnlocked = true
-            return
+        // In testing mode, check UserDefaults
+        if Self.testingModeEnabled {
+            if UserDefaults.standard.bool(forKey: Self.testingProUnlockedKey) {
+                isProUnlocked = true
+                return
+            }
         }
-        #endif
 
         for await result in Transaction.currentEntitlements {
             if case .verified(let transaction) = result {

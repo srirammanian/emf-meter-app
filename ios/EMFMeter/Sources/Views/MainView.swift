@@ -9,6 +9,7 @@ struct MainView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var showSafetyInfo = false
     @State private var showUpgradePrompt = false
+    @State private var showFullScreenOscilloscope = false
     @State private var appStartTime = Date()
 
     var body: some View {
@@ -54,25 +55,28 @@ struct MainView: View {
                         }
                         .padding(.top, geometry.safeAreaInsets.top + 4)
 
-                        // Analog meter display (centered)
+                        // Analog meter display (centered) - fixed size based on screen width
                         AnalogMeterView(
                             needlePosition: viewModel.needlePosition,
                             unit: viewModel.selectedUnit,
                             displayValue: viewModel.displayValue
                         )
+                        .frame(width: geometry.size.width - 32, height: geometry.size.width - 32)
                         .accessibilityElement(children: .ignore)
                         .accessibilityLabel("EMF Reading")
                         .accessibilityValue("\(UnitConverter.formatValue(viewModel.displayValue, unit: viewModel.selectedUnit)) \(viewModel.selectedUnit.accessibilityName)")
                         .accessibilityAddTraits(.updatesFrequently)
 
-                        // Recording panel: Oscilloscope + Record button (Pro features)
+                        // Recording panel: Oscilloscope + Record button
                         RecordingPanelView(
                             readings: recordingService.liveReadings,
                             maxValue: MeterConfig.maxValueUT,
+                            unit: viewModel.selectedUnit,
                             isRecording: recordingService.isRecording,
                             isProUser: storeManager.isProUnlocked,
                             duration: recordingService.isRecording ? recordingService.formattedDuration : nil,
                             onRecordTap: { toggleRecording() },
+                            onOscilloscopeTap: { handleOscilloscopeTap() },
                             onUpgradeNeeded: { showUpgradePrompt = true }
                         )
                         .padding(.horizontal, 16)
@@ -115,6 +119,14 @@ struct MainView: View {
         .sheet(isPresented: $showUpgradePrompt) {
             UpgradePromptView(storeManager: storeManager)
         }
+        .sheet(isPresented: $showFullScreenOscilloscope) {
+            FullScreenOscilloscopeView(
+                readings: recordingService.liveReadings,
+                maxValue: MeterConfig.maxValueUT,
+                unit: viewModel.selectedUnit,
+                sessionStorage: sessionStorage
+            )
+        }
         .onAppear {
             viewModel.start()
             appStartTime = Date()
@@ -123,12 +135,13 @@ struct MainView: View {
             viewModel.stop()
         }
         .onChange(of: viewModel.currentReading) { reading in
-            // Feed readings to oscilloscope display
+            // Feed readings to oscilloscope display for all users (view-only for free)
             if let reading = reading {
                 let elapsed = Date().timeIntervalSince(appStartTime)
                 if recordingService.isRecording {
-                    recordingService.addReading(reading)
-                } else if storeManager.isProUnlocked {
+                    recordingService.addReading(reading, elapsed: elapsed)
+                } else {
+                    // Always feed live readings for oscilloscope display
                     recordingService.addLiveReading(reading, elapsed: elapsed)
                 }
             }
@@ -138,6 +151,8 @@ struct MainView: View {
     // MARK: - Recording
 
     private func toggleRecording() {
+        viewModel.playButtonSound()
+
         if recordingService.isRecording {
             // Stop recording and save session
             if let session = recordingService.stopRecording() {
@@ -150,6 +165,16 @@ struct MainView: View {
         } else {
             // Start recording
             recordingService.startRecording()
+        }
+    }
+
+    // MARK: - Oscilloscope
+
+    private func handleOscilloscopeTap() {
+        if storeManager.isProUnlocked {
+            showFullScreenOscilloscope = true
+        } else {
+            showUpgradePrompt = true
         }
     }
 }
@@ -624,7 +649,9 @@ private struct VintagePushButtonView: View {
             }
             .buttonStyle(.plain)
             .onLongPressGesture(minimumDuration: 0, pressing: { pressing in
-                isPressed = pressing
+                withAnimation(.easeInOut(duration: 0.1)) {
+                    isPressed = pressing
+                }
             }, perform: {})
             .accessibilityLabel("Zero calibration button")
             .accessibilityValue(isActive ? "Calibrated" : "Not calibrated")
@@ -728,10 +755,12 @@ private struct VintageDialButtonView: View {
 private struct RecordingPanelView: View {
     let readings: [TimestampedReading]
     let maxValue: Float
+    let unit: EMFUnit
     let isRecording: Bool
     let isProUser: Bool
     let duration: String?
     let onRecordTap: () -> Void
+    let onOscilloscopeTap: () -> Void
     let onUpgradeNeeded: () -> Void
 
     var body: some View {
@@ -765,16 +794,19 @@ private struct RecordingPanelView: View {
                 )
 
             HStack(spacing: 12) {
-                // Oscilloscope display
+                // Oscilloscope display - tappable
                 OscilloscopeView(
                     readings: readings,
                     maxValue: maxValue,
-                    isProUser: isProUser,
-                    onUpgradeNeeded: onUpgradeNeeded
+                    unit: unit
                 )
                 .frame(height: 90)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    onOscilloscopeTap()
+                }
 
-                // Record button
+                // Record button (Pro-only for recording)
                 RecordButtonView(
                     isRecording: isRecording,
                     isProUser: isProUser,

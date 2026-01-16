@@ -230,6 +230,11 @@ class EMFViewModel: ObservableObject {
         UserDefaults.standard.set(theme, forKey: EMFViewModelKeys.theme)
     }
 
+    /// Play the push button sound (for UI feedback on buttons like REC)
+    func playButtonSound() {
+        audioService.playPushButton()
+    }
+
     func start() {
         magnetometerService.start()
     }

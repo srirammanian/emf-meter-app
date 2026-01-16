@@ -3,11 +3,25 @@ import SwiftUI
 /// Vintage CRT-style oscilloscope view displaying EMF readings over time.
 struct OscilloscopeView: View {
     let readings: [TimestampedReading]
-    let maxValue: Float
-    let isProUser: Bool
-    let onUpgradeNeeded: () -> Void
+    let maxValue: Float  // Always in µT internally
+    let unit: EMFUnit
+    var fullScreen: Bool = false  // When true, fills available space without aspect ratio
 
     private let visibleDuration: TimeInterval = 30  // 30 seconds visible
+
+    /// Convert µT value to display unit
+    private func convertedValue(_ valueUT: Float) -> String {
+        let converted = UnitConverter.convert(valueUT, from: .microTesla, to: unit)
+        if converted >= 1000 {
+            return String(format: "%.0f", converted)
+        } else if converted >= 100 {
+            return String(format: "%.0f", converted)
+        } else if converted >= 10 {
+            return String(format: "%.0f", converted)
+        } else {
+            return String(format: "%.1f", converted)
+        }
+    }
 
     @State private var scrollOffset: CGFloat = 0
     @GestureState private var dragOffset: CGFloat = 0
@@ -15,18 +29,13 @@ struct OscilloscopeView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                if isProUser {
-                    // Full oscilloscope for Pro users
-                    oscilloscopeContent(in: geometry.size)
-                    // Axis labels overlay
-                    axisLabels(in: geometry.size)
-                } else {
-                    // Locked view for free users
-                    lockedView(in: geometry.size)
-                }
+                // Show live oscilloscope for all users (view-only for free users)
+                oscilloscopeContent(in: geometry.size)
+                // Axis labels overlay
+                axisLabels(in: geometry.size)
             }
         }
-        .aspectRatio(3.0, contentMode: .fit)
+        .modifier(AspectRatioModifier(applyAspectRatio: !fullScreen))
     }
 
     // MARK: - Axis Labels
@@ -36,13 +45,13 @@ struct OscilloscopeView: View {
         let padding: CGFloat = 12
 
         ZStack {
-            // Y-axis labels (magnitude)
+            // Y-axis labels (magnitude in selected unit)
             VStack {
-                Text("\(Int(maxValue))")
+                Text(convertedValue(maxValue))
                     .font(.system(size: 8, weight: .medium, design: .monospaced))
                     .foregroundColor(.oscilloscopeTrace.opacity(0.7))
                 Spacer()
-                Text("\(Int(maxValue / 2))")
+                Text(convertedValue(maxValue / 2))
                     .font(.system(size: 8, weight: .medium, design: .monospaced))
                     .foregroundColor(.oscilloscopeTrace.opacity(0.7))
                 Spacer()
@@ -53,6 +62,14 @@ struct OscilloscopeView: View {
             .padding(.vertical, padding + 2)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.leading, padding + 2)
+
+            // Unit label in top-right
+            Text(unit.symbol)
+                .font(.system(size: 8, weight: .bold, design: .monospaced))
+                .foregroundColor(.oscilloscopeTrace.opacity(0.7))
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                .padding(.top, padding + 2)
+                .padding(.trailing, padding + 4)
 
             // X-axis labels (time)
             HStack {
@@ -102,39 +119,6 @@ struct OscilloscopeView: View {
         }
         .gesture(dragGesture)
         .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-
-    // MARK: - Locked View
-
-    @ViewBuilder
-    private func lockedView(in size: CGSize) -> some View {
-        ZStack {
-            // Dimmed CRT background
-            crtBackground
-                .opacity(0.5)
-
-            // Grid (faded)
-            graticule(in: size)
-                .opacity(0.3)
-
-            // Lock overlay
-            VStack(spacing: 8) {
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 24))
-                    .foregroundColor(.oscilloscopeTrace.opacity(0.6))
-
-                Text("Pro Feature")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.oscilloscopeTrace.opacity(0.6))
-            }
-
-            // Bezel frame
-            bezelFrame
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .onTapGesture {
-            onUpgradeNeeded()
-        }
     }
 
     // MARK: - CRT Effects
@@ -318,9 +302,24 @@ struct OscilloscopeView: View {
     }
 }
 
+// MARK: - Aspect Ratio Modifier
+
+/// Conditionally applies aspect ratio to support full-screen mode
+private struct AspectRatioModifier: ViewModifier {
+    let applyAspectRatio: Bool
+
+    func body(content: Content) -> some View {
+        if applyAspectRatio {
+            content.aspectRatio(3.0, contentMode: .fit)
+        } else {
+            content
+        }
+    }
+}
+
 // MARK: - Preview
 
-#Preview("Oscilloscope - Pro") {
+#Preview("Oscilloscope - With Data") {
     let readings = (0..<300).map { i in
         TimestampedReading(
             timestamp: Double(i) * 0.1,
@@ -331,12 +330,11 @@ struct OscilloscopeView: View {
         )
     }
 
-    return VStack {
+    VStack {
         OscilloscopeView(
             readings: readings,
             maxValue: 200,
-            isProUser: true,
-            onUpgradeNeeded: {}
+            unit: .microTesla
         )
         .frame(height: 120)
         .padding()
@@ -344,13 +342,12 @@ struct OscilloscopeView: View {
     .background(Color.black)
 }
 
-#Preview("Oscilloscope - Locked") {
+#Preview("Oscilloscope - Empty") {
     VStack {
         OscilloscopeView(
             readings: [],
             maxValue: 200,
-            isProUser: false,
-            onUpgradeNeeded: {}
+            unit: .microTesla
         )
         .frame(height: 120)
         .padding()

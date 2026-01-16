@@ -140,8 +140,7 @@ struct SessionDetailView: View {
             OscilloscopeView(
                 readings: session.readings,
                 maxValue: MeterConfig.maxValueUT,
-                isProUser: true,
-                onUpgradeNeeded: {}
+                unit: selectedUnit
             )
             .frame(height: 100)
             .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))

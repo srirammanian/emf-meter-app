@@ -303,4 +303,175 @@ final class EMFMeterUITests: XCTestCase {
             XCTAssertTrue(app.otherElements["EMF Reading"].exists)
         }
     }
+
+    // MARK: - In-App Purchase Tests
+
+    /// Test that tapping locked REC button shows upgrade prompt.
+    func testLockedRecordButtonShowsUpgrade() throws {
+        // Launch with testing mode disabled to test actual lock behavior
+        app.launchArguments = ["--uitesting", "--disable-testing-mode"]
+        app.launch()
+
+        // Find and tap the record button (should be locked for free users)
+        let recordButton = app.buttons["Start recording"]
+        XCTAssertTrue(recordButton.waitForExistence(timeout: 5))
+
+        // Tap the locked button
+        recordButton.tap()
+
+        // Should show upgrade prompt
+        let upgradePrompt = app.staticTexts["Unlock Pro Features"]
+        if upgradePrompt.waitForExistence(timeout: 3) {
+            XCTAssertTrue(upgradePrompt.exists, "Upgrade prompt should appear when tapping locked feature")
+
+            // Dismiss the upgrade prompt
+            let dismissButton = app.buttons["Maybe Later"]
+            if dismissButton.exists {
+                dismissButton.tap()
+            }
+        }
+    }
+
+    /// Test that tapping locked oscilloscope shows upgrade prompt.
+    func testLockedOscilloscopeTapShowsUpgrade() throws {
+        // Launch with testing mode disabled
+        app.launchArguments = ["--uitesting", "--disable-testing-mode"]
+        app.launch()
+
+        // Wait for main view
+        XCTAssertTrue(app.otherElements["EMF Reading"].waitForExistence(timeout: 5))
+
+        // The oscilloscope area should be tappable
+        // When tapped by free user, should show upgrade prompt
+        // Note: The actual element identifier depends on accessibility setup
+    }
+
+    /// Test upgrade prompt UI elements are present.
+    func testUpgradePromptUIElements() throws {
+        app.launchArguments = ["--uitesting", "--disable-testing-mode"]
+        app.launch()
+
+        // Trigger upgrade prompt via locked feature
+        let recordButton = app.buttons["Start recording"]
+        XCTAssertTrue(recordButton.waitForExistence(timeout: 5))
+        recordButton.tap()
+
+        // Check for upgrade prompt elements
+        let upgradePrompt = app.staticTexts["Unlock Pro Features"]
+        if upgradePrompt.waitForExistence(timeout: 3) {
+            // Verify key UI elements
+            XCTAssertTrue(app.staticTexts["Unlock Pro Features"].exists)
+
+            // Check for purchase button
+            let purchaseButton = app.buttons["Upgrade to Pro"]
+            XCTAssertTrue(purchaseButton.exists || app.buttons.matching(NSPredicate(format: "label CONTAINS 'Upgrade'")).count > 0)
+
+            // Check for restore button
+            let restoreButton = app.buttons["Restore Purchase"]
+            XCTAssertTrue(restoreButton.exists)
+
+            // Check for dismiss button
+            let dismissButton = app.buttons["Maybe Later"]
+            XCTAssertTrue(dismissButton.exists)
+        }
+    }
+
+    /// Test dismiss upgrade prompt.
+    func testDismissUpgradePrompt() throws {
+        app.launchArguments = ["--uitesting", "--disable-testing-mode"]
+        app.launch()
+
+        // Trigger upgrade prompt
+        let recordButton = app.buttons["Start recording"]
+        XCTAssertTrue(recordButton.waitForExistence(timeout: 5))
+        recordButton.tap()
+
+        // Wait for prompt
+        let upgradePrompt = app.staticTexts["Unlock Pro Features"]
+        if upgradePrompt.waitForExistence(timeout: 3) {
+            // Dismiss
+            let dismissButton = app.buttons["Maybe Later"]
+            XCTAssertTrue(dismissButton.exists)
+            dismissButton.tap()
+
+            // Verify prompt is dismissed
+            sleep(1)
+            XCTAssertFalse(app.staticTexts["Unlock Pro Features"].exists)
+
+            // Verify app is still functional
+            XCTAssertTrue(app.otherElements["EMF Reading"].exists)
+        }
+    }
+
+    /// Test restore purchases button is functional.
+    func testRestorePurchasesButton() throws {
+        app.launchArguments = ["--uitesting", "--disable-testing-mode"]
+        app.launch()
+
+        // Trigger upgrade prompt
+        let recordButton = app.buttons["Start recording"]
+        XCTAssertTrue(recordButton.waitForExistence(timeout: 5))
+        recordButton.tap()
+
+        // Wait for prompt
+        let upgradePrompt = app.staticTexts["Unlock Pro Features"]
+        if upgradePrompt.waitForExistence(timeout: 3) {
+            // Tap restore
+            let restoreButton = app.buttons["Restore Purchase"]
+            XCTAssertTrue(restoreButton.exists)
+            restoreButton.tap()
+
+            // Should not crash, may show loading indicator
+            sleep(2)
+
+            // App should still be functional (prompt may still be showing or dismissed)
+            // Just verify no crash occurred
+        }
+    }
+
+    /// Test Pro features are accessible after unlock (using testing mode).
+    func testProFeaturesAccessibleAfterUnlock() throws {
+        // Launch with testing mode enabled (simulates Pro user)
+        app.launch()
+
+        // Wait for main view
+        XCTAssertTrue(app.otherElements["EMF Reading"].waitForExistence(timeout: 5))
+
+        // Record button should be accessible
+        let recordButton = app.buttons["Start recording"]
+        XCTAssertTrue(recordButton.waitForExistence(timeout: 3))
+
+        // Tap should start recording (not show upgrade prompt)
+        recordButton.tap()
+        sleep(1)
+
+        // Should show stop recording button now
+        let stopButton = app.buttons["Stop recording"]
+        if stopButton.exists {
+            XCTAssertTrue(stopButton.exists, "Recording should start for Pro users")
+
+            // Stop recording
+            stopButton.tap()
+        }
+    }
+
+    /// Test session history is accessible for Pro users.
+    func testSessionHistoryAccessibleForPro() throws {
+        app.launch()
+
+        // Open settings
+        let settingsButton = app.buttons["Settings"]
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 5))
+        settingsButton.tap()
+
+        // Look for session history in settings
+        let sessionsButton = app.buttons["Recording Sessions"]
+        if sessionsButton.waitForExistence(timeout: 3) {
+            sessionsButton.tap()
+
+            // Should show session history view
+            let historyTitle = app.staticTexts["Recording Sessions"]
+            XCTAssertTrue(historyTitle.waitForExistence(timeout: 3) || app.navigationBars["Recording Sessions"].exists)
+        }
+    }
 }

@@ -29,7 +29,7 @@ class RecordingService: ObservableObject {
 
         sessionStartTime = Date()
         readings = []
-        liveReadings = []
+        // Keep liveReadings to maintain oscilloscope continuity
         isRecording = true
         recordingDuration = 0
 
@@ -66,17 +66,23 @@ class RecordingService: ObservableObject {
     }
 
     /// Add a reading to the current recording session.
-    func addReading(_ reading: EMFReading) {
+    /// - Parameters:
+    ///   - reading: The EMF reading to add
+    ///   - elapsed: Elapsed time since app start, used for live display continuity
+    func addReading(_ reading: EMFReading, elapsed: TimeInterval) {
         guard isRecording, let startTime = sessionStartTime else { return }
 
-        let timestamped = TimestampedReading(
-            timestamp: Date().timeIntervalSince(startTime),
+        // Use session-relative timestamp for the recording
+        let sessionTimestamp = Date().timeIntervalSince(startTime)
+        let recordingTimestamped = TimestampedReading(
+            timestamp: sessionTimestamp,
             reading: reading
         )
-        readings.append(timestamped)
+        readings.append(recordingTimestamped)
 
-        // Update live readings for oscilloscope display
-        liveReadings.append(timestamped)
+        // Use app-relative timestamp for live display to maintain continuity
+        let liveTimestamped = TimestampedReading(timestamp: elapsed, reading: reading)
+        liveReadings.append(liveTimestamped)
         if liveReadings.count > maxLiveReadings {
             liveReadings.removeFirst(liveReadings.count - maxLiveReadings)
         }

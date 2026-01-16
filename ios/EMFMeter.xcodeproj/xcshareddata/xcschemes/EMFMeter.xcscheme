@@ -37,6 +37,16 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "UNITTESTTARGET001122334455"
+               BuildableName = "EMFMeterTests.xctest"
+               BlueprintName = "EMFMeterTests"
+               ReferencedContainer = "container:EMFMeter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
