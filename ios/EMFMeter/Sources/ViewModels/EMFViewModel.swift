@@ -46,12 +46,10 @@ class EMFViewModel: ObservableObject {
     private var currentReading: ProcessedReading?
 
     /// Initialize with automatic service selection (mock on simulator, real on device).
+    /// Also supports UI testing launch arguments for different scenarios.
     convenience init() {
-        #if targetEnvironment(simulator)
-        self.init(magnetometerService: AnyMagnetometerService(MockMagnetometerService()))
-        #else
-        self.init(magnetometerService: AnyMagnetometerService(MagnetometerService()))
-        #endif
+        let service = MagnetometerServiceFactory.create()
+        self.init(magnetometerService: AnyMagnetometerService(service))
     }
 
     /// Initialize with a specific magnetometer service (for testing/customization).

@@ -226,13 +226,171 @@ private struct SimulationState {
     }
 }
 
+// MARK: - UI Testing Mock Service
+
+/// Mock service that simulates sensor unavailable state for UI testing.
+class UnavailableMagnetometerService: ObservableObject, MagnetometerServiceProtocol {
+    @Published private(set) var currentReading: EMFReading?
+    @Published private(set) var isAvailable: Bool = false
+
+    var currentReadingPublisher: Published<EMFReading?>.Publisher { $currentReading }
+    var isAvailablePublisher: Published<Bool>.Publisher { $isAvailable }
+
+    func start() {
+        // Sensor is unavailable, do nothing
+    }
+
+    func stop() {
+        // Nothing to stop
+    }
+}
+
+/// Mock service that produces fixed low values for UI testing.
+class LowValueMagnetometerService: ObservableObject, MagnetometerServiceProtocol {
+    @Published private(set) var currentReading: EMFReading?
+    @Published private(set) var isAvailable: Bool = true
+
+    var currentReadingPublisher: Published<EMFReading?>.Publisher { $currentReading }
+    var isAvailablePublisher: Published<Bool>.Publisher { $isAvailable }
+
+    private var timer: Timer?
+
+    func start() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
+            // Generate very low values (1-5 µT)
+            let noise = Float.random(in: -0.5...0.5)
+            self?.currentReading = EMFReading(
+                x: 1.0 + noise,
+                y: 1.5 + noise,
+                z: 2.0 + noise,
+                timestamp: Date().timeIntervalSince1970
+            )
+        }
+    }
+
+    func stop() {
+        timer?.invalidate()
+        timer = nil
+    }
+}
+
+/// Mock service that produces fixed high values for UI testing.
+class HighValueMagnetometerService: ObservableObject, MagnetometerServiceProtocol {
+    @Published private(set) var currentReading: EMFReading?
+    @Published private(set) var isAvailable: Bool = true
+
+    var currentReadingPublisher: Published<EMFReading?>.Publisher { $currentReading }
+    var isAvailablePublisher: Published<Bool>.Publisher { $isAvailable }
+
+    private var timer: Timer?
+
+    func start() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
+            // Generate high values near max (180-200 µT)
+            let noise = Float.random(in: -2...2)
+            self?.currentReading = EMFReading(
+                x: 110.0 + noise,
+                y: 105.0 + noise,
+                z: 100.0 + noise,
+                timestamp: Date().timeIntervalSince1970
+            )
+        }
+    }
+
+    func stop() {
+        timer?.invalidate()
+        timer = nil
+    }
+}
+
+/// Mock service that produces rapidly fluctuating values for UI testing.
+class FluctuatingMagnetometerService: ObservableObject, MagnetometerServiceProtocol {
+    @Published private(set) var currentReading: EMFReading?
+    @Published private(set) var isAvailable: Bool = true
+
+    var currentReadingPublisher: Published<EMFReading?>.Publisher { $currentReading }
+    var isAvailablePublisher: Published<Bool>.Publisher { $isAvailable }
+
+    private var timer: Timer?
+    private var phase: Float = 0
+
+    func start() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            self.phase += 0.3
+
+            // Rapidly oscillating values
+            let base: Float = 100.0
+            let amplitude: Float = 80.0
+            self.currentReading = EMFReading(
+                x: base + amplitude * sin(self.phase),
+                y: base + amplitude * cos(self.phase * 1.3),
+                z: base + amplitude * sin(self.phase * 0.7),
+                timestamp: Date().timeIntervalSince1970
+            )
+        }
+    }
+
+    func stop() {
+        timer?.invalidate()
+        timer = nil
+    }
+}
+
+/// Mock service that produces medium/normal values for UI testing.
+class MediumValueMagnetometerService: ObservableObject, MagnetometerServiceProtocol {
+    @Published private(set) var currentReading: EMFReading?
+    @Published private(set) var isAvailable: Bool = true
+
+    var currentReadingPublisher: Published<EMFReading?>.Publisher { $currentReading }
+    var isAvailablePublisher: Published<Bool>.Publisher { $isAvailable }
+
+    private var timer: Timer?
+
+    func start() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
+            // Generate medium values (40-60 µT, typical Earth field)
+            let noise = Float.random(in: -1...1)
+            self?.currentReading = EMFReading(
+                x: 30.0 + noise,
+                y: 25.0 + noise,
+                z: 35.0 + noise,
+                timestamp: Date().timeIntervalSince1970
+            )
+        }
+    }
+
+    func stop() {
+        timer?.invalidate()
+        timer = nil
+    }
+}
+
 // MARK: - Service Factory
 
 /// Factory for creating the appropriate magnetometer service based on environment.
 enum MagnetometerServiceFactory {
     /// Creates a magnetometer service appropriate for the current environment.
     /// Returns MockMagnetometerService on simulator, real MagnetometerService on device.
+    /// Supports UI testing launch arguments for different scenarios.
     static func create() -> any MagnetometerServiceProtocol {
+        // Check for UI testing launch arguments
+        let arguments = ProcessInfo.processInfo.arguments
+
+        if arguments.contains("--uitesting") {
+            if arguments.contains("--sensor-unavailable") {
+                return UnavailableMagnetometerService()
+            } else if arguments.contains("--mock-value-low") {
+                return LowValueMagnetometerService()
+            } else if arguments.contains("--mock-value-high") {
+                return HighValueMagnetometerService()
+            } else if arguments.contains("--mock-value-fluctuating") {
+                return FluctuatingMagnetometerService()
+            } else if arguments.contains("--mock-value-medium") {
+                return MediumValueMagnetometerService()
+            }
+        }
+
         #if targetEnvironment(simulator)
         return MockMagnetometerService()
         #else

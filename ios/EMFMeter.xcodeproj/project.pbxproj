@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		00619F13F4B531D9F4E5120A /* EMFMeterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE54EB322698AF4BFD17C804 /* EMFMeterApp.swift */; };
+		UITEST001122334455667788 /* EMFMeterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITEST112233445566778899 /* EMFMeterUITests.swift */; };
+		UITEST002233445566778899 /* EMFMeterEdgeCaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITEST223344556677889900 /* EMFMeterEdgeCaseTests.swift */; };
 		1A2B3C4D5E6F7A8B9C0D1E2F /* AppIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3C4D5E6F7A8B9C0D1E2F3A /* AppIconView.swift */; };
 		1B3C4D5E6F7A8B9C0D1E2F3B /* LaunchScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C4D5E6F7A8B9C0D1E2F3A4B /* LaunchScreenView.swift */; };
 		285BBE288C2E8211F78EC9B4 /* AnalogMeterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CBE27F45D5922C55001FC67 /* AnalogMeterView.swift */; };
@@ -32,10 +34,23 @@
 		F6098BED076EBFBC63F9D068 /* ControlButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A975F44B931E140E5F0E6CC9 /* ControlButtonsView.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		UITESTPROXY00112233445566 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD3F16DFE194336C285C1072 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B7B21BD2B81BFE1F18D9DBB9;
+			remoteInfo = EMFMeter;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		1150029191777EE15DF7C37A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1450F6081C7D37AB966FD579 /* EMFViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EMFViewModel.swift; sourceTree = "<group>"; };
 		1EB2FCE81DFCB3FAC72CFC66 /* EMFMeter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EMFMeter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		UITEST112233445566778899 /* EMFMeterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EMFMeterUITests.swift; sourceTree = "<group>"; };
+		UITEST223344556677889900 /* EMFMeterEdgeCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EMFMeterEdgeCaseTests.swift; sourceTree = "<group>"; };
+		UITESTBUNDLE0011223344556 /* EMFMeterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EMFMeterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		27FF3A82779588DB9328B1DA /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		2B3C4D5E6F7A8B9C0D1E2F3A /* AppIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconView.swift; sourceTree = "<group>"; };
 		2C4D5E6F7A8B9C0D1E2F3A4B /* LaunchScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenView.swift; sourceTree = "<group>"; };
@@ -94,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				1EB2FCE81DFCB3FAC72CFC66 /* EMFMeter.app */,
+				UITESTBUNDLE0011223344556 /* EMFMeterUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -102,10 +118,20 @@
 			isa = PBXGroup;
 			children = (
 				9933E9918A55ADB763E2ED5D /* EMFMeter */,
+				UITESTGROUP001122334455667 /* EMFMeterUITests */,
 				511A7F4590CA36A164AA3706 /* Resources */,
 				E21AE5529090D5A9A373BB62 /* Sources */,
 				2A95BDF8D08B21A64713BE85 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		UITESTGROUP001122334455667 /* EMFMeterUITests */ = {
+			isa = PBXGroup;
+			children = (
+				UITEST112233445566778899 /* EMFMeterUITests.swift */,
+				UITEST223344556677889900 /* EMFMeterEdgeCaseTests.swift */,
+			);
+			path = EMFMeterUITests;
 			sourceTree = "<group>";
 		};
 		511A7F4590CA36A164AA3706 /* Resources */ = {
@@ -233,7 +259,31 @@
 			productReference = 1EB2FCE81DFCB3FAC72CFC66 /* EMFMeter.app */;
 			productType = "com.apple.product-type.application";
 		};
+		UITESTTARGET0011223344556 /* EMFMeterUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = UITESTCFGLIST001122334455 /* Build configuration list for PBXNativeTarget "EMFMeterUITests" */;
+			buildPhases = (
+				UITESTSOURCES00112233445566 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				UITESTDEP0011223344556677 /* PBXTargetDependency */,
+			);
+			name = EMFMeterUITests;
+			productName = EMFMeterUITests;
+			productReference = UITESTBUNDLE0011223344556 /* EMFMeterUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXTargetDependency section */
+		UITESTDEP0011223344556677 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B7B21BD2B81BFE1F18D9DBB9 /* EMFMeter */;
+			targetProxy = UITESTPROXY00112233445566 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXProject section */
 		BD3F16DFE194336C285C1072 /* Project object */ = {
@@ -261,6 +311,7 @@
 			projectRoot = "";
 			targets = (
 				B7B21BD2B81BFE1F18D9DBB9 /* EMFMeter */,
+				UITESTTARGET0011223344556 /* EMFMeterUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -282,6 +333,15 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		UITESTSOURCES00112233445566 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				UITEST001122334455667788 /* EMFMeterUITests.swift in Sources */,
+				UITEST002233445566778899 /* EMFMeterEdgeCaseTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B4B273D7B719C568B7CFAD67 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -309,6 +369,46 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		UITESTCFGDEBUG001122334455 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4GTAKXJ536;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.anju.emfmeter.app.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = EMFMeter;
+			};
+			name = Debug;
+		};
+		UITESTCFGRELEASE0011223344 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4GTAKXJ536;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.anju.emfmeter.app.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = EMFMeter;
+			};
+			name = Release;
+		};
 		440BABDD615206B097BDF79F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -487,6 +587,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		UITESTCFGLIST001122334455 /* Build configuration list for PBXNativeTarget "EMFMeterUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				UITESTCFGDEBUG001122334455 /* Debug */,
+				UITESTCFGRELEASE0011223344 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		1A28B9F1B58D7FB95B2F3E71 /* Build configuration list for PBXNativeTarget "EMFMeter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
