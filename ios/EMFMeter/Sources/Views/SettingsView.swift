@@ -129,6 +129,7 @@ private struct OptionRow: View {
                         .foregroundColor(.appPrimary)
                 }
             }
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
