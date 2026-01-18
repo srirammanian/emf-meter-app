@@ -83,10 +83,8 @@ struct MainView: View {
             SettingsView(
                 selectedUnit: viewModel.selectedUnit,
                 selectedTheme: viewModel.theme,
-                isCalibrated: viewModel.isCalibrated,
                 onUnitChange: { viewModel.setUnit($0) },
-                onThemeChange: { viewModel.setTheme($0) },
-                onResetCalibration: { viewModel.resetCalibration() }
+                onThemeChange: { viewModel.setTheme($0) }
             )
             .presentationDetents([.medium, .large])
         }
