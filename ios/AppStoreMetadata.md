@@ -54,6 +54,27 @@ EMF,meter,detector,electromagnetic,field,magnetometer,gauss,tesla,ghost,paranorm
 
 ---
 
+## What's New (Version 2.0)
+
+**Live Oscilloscope**
+Watch your EMF readings come alive on a beautiful 1950s CRT-style oscilloscope. Scroll back through 30 seconds of history with a simple drag.
+
+**Session Recording**
+Record EMF readings with precise timestamps. Continue recording in the background for up to 3 hours.
+
+**Session History**
+Browse all your saved recordings with detailed statistics including min, max, and average values. Add notes to remember what you measured.
+
+**CSV Export**
+Export recordings to analyze in Excel, Google Sheets, or any data tool.
+
+**Full-Screen View**
+Tap the oscilloscope to expand it full screen alongside your session history.
+
+Pro features available as a one-time $2.99 purchase. The classic EMF meter remains free forever.
+
+---
+
 ## What's New (Version 1.0)
 Initial release featuring vintage analog meter design, real-time EMF detection, multiple units, calibration, and atmospheric sound effects.
 
