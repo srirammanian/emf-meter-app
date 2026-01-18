@@ -4,10 +4,8 @@ import SwiftUI
 struct SettingsView: View {
     let selectedUnit: EMFUnit
     let selectedTheme: String
-    let isCalibrated: Bool
     let onUnitChange: (EMFUnit) -> Void
     let onThemeChange: (String) -> Void
-    let onResetCalibration: () -> Void
 
     // Pro features
     @ObservedObject var storeManager: StoreKitManager
@@ -142,26 +140,6 @@ struct SettingsView: View {
                     Text("Theme")
                 }
 
-                // Calibration
-                Section {
-                    HStack {
-                        Text(isCalibrated ? "Calibrated" : "Not calibrated")
-                            .foregroundColor(isCalibrated ? .green : .secondary)
-
-                        Spacer()
-
-                        if isCalibrated {
-                            Button("Reset") {
-                                onResetCalibration()
-                            }
-                            .foregroundColor(.red)
-                            .buttonStyle(.bordered)
-                        }
-                    }
-                } header: {
-                    Text("Calibration")
-                }
-
                 // Purchases
                 Section {
                     Button {
@@ -256,10 +234,8 @@ private struct OptionRow: View {
     SettingsView(
         selectedUnit: .milliGauss,
         selectedTheme: "system",
-        isCalibrated: true,
         onUnitChange: { _ in },
         onThemeChange: { _ in },
-        onResetCalibration: {},
         storeManager: StoreKitManager(),
         sessionStorage: SessionStorage()
     )
