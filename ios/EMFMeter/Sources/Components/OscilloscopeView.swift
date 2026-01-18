@@ -25,6 +25,12 @@ struct OscilloscopeView: View {
 
     @State private var scrollOffset: CGFloat = 0
     @GestureState private var dragOffset: CGFloat = 0
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// Aspect ratio adapts to device - wider on iPad
+    private var aspectRatio: CGFloat {
+        horizontalSizeClass == .regular ? 7.0 : 3.5
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -35,7 +41,7 @@ struct OscilloscopeView: View {
                 axisLabels(in: geometry.size)
             }
         }
-        .modifier(AspectRatioModifier(applyAspectRatio: !fullScreen))
+        .modifier(AspectRatioModifier(applyAspectRatio: !fullScreen, ratio: aspectRatio))
     }
 
     // MARK: - Axis Labels
@@ -307,10 +313,11 @@ struct OscilloscopeView: View {
 /// Conditionally applies aspect ratio to support full-screen mode
 private struct AspectRatioModifier: ViewModifier {
     let applyAspectRatio: Bool
+    var ratio: CGFloat = 3.0
 
     func body(content: Content) -> some View {
         if applyAspectRatio {
-            content.aspectRatio(3.0, contentMode: .fit)
+            content.aspectRatio(ratio, contentMode: .fit)
         } else {
             content
         }
