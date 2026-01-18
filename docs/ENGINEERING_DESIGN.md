@@ -1,6 +1,6 @@
 # EMF Meter App - Engineering Design Document
 
-**Version:** 1.0
+**Version:** 2.0
 **Last Updated:** January 2026
 **Status:** Draft
 
@@ -8,7 +8,9 @@
 
 ## 1. Overview
 
-This document describes the technical architecture and implementation details for the EMF Meter application. The app is built using a cross-platform strategy with Kotlin Multiplatform (KMP) for shared business logic and native UI implementations using SwiftUI (iOS) and Jetpack Compose (Android).
+This document describes the technical architecture and implementation details for the EMF Meter application. The app is built natively for iOS using SwiftUI, with Android support via Kotlin/Jetpack Compose.
+
+**V2.0** adds Pro features (iOS only): session recording, oscilloscope graph, session history, and CSV export—monetized via StoreKit 2 in-app purchase.
 
 ---
 
@@ -23,37 +25,38 @@ This document describes the technical architecture and implementation details fo
 │      iOS (SwiftUI)          │        Android (Compose)          │
 │  ┌───────────────────────┐  │  ┌───────────────────────────┐    │
 │  │ Views / Components    │  │  │ Composables / Screens     │    │
-│  │ - AnalogMeterView     │  │  │ - AnalogMeterScreen       │    │
-│  │ - DigitalDisplayView  │  │  │ - DigitalDisplayScreen    │    │
-│  │ - SettingsView        │  │  │ - SettingsScreen          │    │
+│  │ - MainView            │  │  │ - AnalogMeterScreen       │    │
+│  │ - AnalogMeterView     │  │  │ - SettingsScreen          │    │
+│  │ - OscilloscopeView ◆  │  │  │                           │    │
+│  │ - RecordButtonView ◆  │  │  │                           │    │
+│  │ - SettingsView        │  │  │                           │    │
+│  │ - SessionHistoryView ◆│  │  │                           │    │
+│  │ - UpgradePromptView ◆ │  │  │                           │    │
 │  └───────────────────────┘  │  └───────────────────────────┘    │
 │  ┌───────────────────────┐  │  ┌───────────────────────────┐    │
 │  │ ViewModels            │  │  │ ViewModels                │    │
 │  │ - EMFViewModel        │  │  │ - EMFViewModel            │    │
+│  │ - RecordingViewModel ◆│  │  │                           │    │
+│  │ - StoreViewModel ◆    │  │  │                           │    │
 │  └───────────────────────┘  │  └───────────────────────────┘    │
 ├─────────────────────────────┴───────────────────────────────────┤
-│                    SHARED LAYER (KMP)                            │
+│                       DOMAIN LAYER                               │
 │  ┌────────────────────────────────────────────────────────────┐ │
-│  │ Domain Layer                                                │ │
-│  │ - EMFReading (data class)                                   │ │
+│  │ Models                                                      │ │
+│  │ - EMFReading                                                │ │
 │  │ - EMFUnit (enum)                                            │ │
-│  │ - MeterRange (config)                                       │ │
 │  │ - CalibrationData                                           │ │
+│  │ - RecordingSession ◆                                        │ │
+│  │ - SessionMetadata ◆                                         │ │
 │  └────────────────────────────────────────────────────────────┘ │
 │  ┌────────────────────────────────────────────────────────────┐ │
 │  │ Business Logic                                              │ │
-│  │ - EMFProcessor (magnitude calculation, unit conversion)     │ │
-│  │ - CalibrationManager                                        │ │
 │  │ - NeedlePhysicsEngine                                       │ │
-│  │ - SoundEngine (click rate calculation)                      │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │ Utilities                                                   │ │
 │  │ - UnitConverter                                             │ │
-│  │ - MathUtils                                                 │ │
+│  │ - MeterConfig                                               │ │
 │  └────────────────────────────────────────────────────────────┘ │
 ├─────────────────────────────────────────────────────────────────┤
-│                     PLATFORM LAYER                               │
+│                     PLATFORM/SERVICE LAYER                       │
 ├─────────────────────────────┬───────────────────────────────────┤
 │      iOS                    │        Android                     │
 │  ┌───────────────────────┐  │  ┌───────────────────────────┐    │
@@ -65,10 +68,24 @@ This document describes the technical architecture and implementation details fo
 │  │ (AVFoundation)        │  │  │ (SoundPool)               │    │
 │  └───────────────────────┘  │  └───────────────────────────┘    │
 │  ┌───────────────────────┐  │  ┌───────────────────────────┐    │
-│  │ SettingsStorage       │  │  │ SettingsStorage           │    │
-│  │ (UserDefaults)        │  │  │ (DataStore)               │    │
+│  │ RecordingService ◆    │  │  │ SettingsStorage           │    │
+│  │ (Background tasks)    │  │  │ (DataStore)               │    │
 │  └───────────────────────┘  │  └───────────────────────────┘    │
+│  ┌───────────────────────┐  │                                   │
+│  │ SessionStorage ◆      │  │                                   │
+│  │ (File + UserDefaults) │  │                                   │
+│  └───────────────────────┘  │                                   │
+│  ┌───────────────────────┐  │                                   │
+│  │ StoreKitManager ◆     │  │                                   │
+│  │ (StoreKit 2)          │  │                                   │
+│  └───────────────────────┘  │                                   │
+│  ┌───────────────────────┐  │                                   │
+│  │ ExportService ◆       │  │                                   │
+│  │ (CSV generation)      │  │                                   │
+│  └───────────────────────┘  │                                   │
 └─────────────────────────────┴───────────────────────────────────┘
+
+◆ = New in V2.0 (Pro features, iOS only)
 ```
 
 ### 2.2 Code Sharing Strategy
@@ -1116,11 +1133,894 @@ class SettingsRepository @Inject constructor(
 
 ---
 
-## 12. Future Considerations (V2)
+## 12. V2 Pro Features Architecture (iOS)
 
-- Graph view with historical data
-- Data export (CSV, JSON)
-- Map overlay showing EMF readings by location
-- Widget support
-- Watch companion apps
-- AR mode showing EMF visualization in camera view
+### 12.1 New Data Models
+
+#### 12.1.1 RecordingSession
+```swift
+struct RecordingSession: Identifiable, Codable {
+    let id: UUID
+    var name: String?
+    var notes: String?
+    let startTime: Date
+    var endTime: Date?
+    var readings: [TimestampedReading]
+
+    var duration: TimeInterval {
+        (endTime ?? Date()).timeIntervalSince(startTime)
+    }
+
+    var statistics: SessionStatistics {
+        SessionStatistics(readings: readings)
+    }
+}
+
+struct TimestampedReading: Codable {
+    let timestamp: TimeInterval  // Seconds since session start
+    let x: Float
+    let y: Float
+    let z: Float
+    let magnitude: Float
+}
+
+struct SessionStatistics: Codable {
+    let minMagnitude: Float
+    let maxMagnitude: Float
+    let avgMagnitude: Float
+    let readingCount: Int
+
+    init(readings: [TimestampedReading]) {
+        guard !readings.isEmpty else {
+            self.minMagnitude = 0
+            self.maxMagnitude = 0
+            self.avgMagnitude = 0
+            self.readingCount = 0
+            return
+        }
+        self.minMagnitude = readings.map(\.magnitude).min() ?? 0
+        self.maxMagnitude = readings.map(\.magnitude).max() ?? 0
+        self.avgMagnitude = readings.map(\.magnitude).reduce(0, +) / Float(readings.count)
+        self.readingCount = readings.count
+    }
+}
+```
+
+#### 12.1.2 SessionMetadata (for list view, lightweight)
+```swift
+struct SessionMetadata: Identifiable, Codable {
+    let id: UUID
+    var name: String?
+    let startTime: Date
+    let endTime: Date
+    let duration: TimeInterval
+    let readingCount: Int
+    let minMagnitude: Float
+    let maxMagnitude: Float
+    let avgMagnitude: Float
+}
+```
+
+### 12.2 RecordingService
+
+Handles session recording with background support.
+
+```swift
+import Foundation
+import Combine
+import BackgroundTasks
+
+class RecordingService: ObservableObject {
+    // MARK: - Published State
+    @Published private(set) var isRecording: Bool = false
+    @Published private(set) var currentSession: RecordingSession?
+    @Published private(set) var recordingDuration: TimeInterval = 0
+
+    // MARK: - Configuration
+    @AppStorage("maxBackgroundDuration") var maxBackgroundDuration: TimeInterval = 3600 // 1 hour
+
+    // MARK: - Private
+    private var readings: [TimestampedReading] = []
+    private var sessionStartTime: Date?
+    private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
+    private var durationTimer: Timer?
+    private var cancellables = Set<AnyCancellable>()
+
+    // MARK: - Recording Control
+
+    func startRecording() {
+        guard !isRecording else { return }
+
+        sessionStartTime = Date()
+        readings = []
+        isRecording = true
+        recordingDuration = 0
+
+        currentSession = RecordingSession(
+            id: UUID(),
+            name: nil,
+            notes: nil,
+            startTime: sessionStartTime!,
+            endTime: nil,
+            readings: []
+        )
+
+        startDurationTimer()
+        registerBackgroundTask()
+    }
+
+    func stopRecording() -> RecordingSession? {
+        guard isRecording, var session = currentSession else { return nil }
+
+        isRecording = false
+        session.endTime = Date()
+        session.readings = readings
+
+        durationTimer?.invalidate()
+        endBackgroundTask()
+
+        currentSession = nil
+        readings = []
+
+        return session
+    }
+
+    func addReading(_ reading: EMFReading) {
+        guard isRecording, let startTime = sessionStartTime else { return }
+
+        let timestamped = TimestampedReading(
+            timestamp: Date().timeIntervalSince(startTime),
+            x: reading.x,
+            y: reading.y,
+            z: reading.z,
+            magnitude: reading.magnitude
+        )
+        readings.append(timestamped)
+    }
+
+    // MARK: - Background Support
+
+    private func registerBackgroundTask() {
+        backgroundTask = UIApplication.shared.beginBackgroundTask { [weak self] in
+            self?.handleBackgroundExpiration()
+        }
+    }
+
+    private func endBackgroundTask() {
+        if backgroundTask != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTask)
+            backgroundTask = .invalid
+        }
+    }
+
+    private func handleBackgroundExpiration() {
+        // Auto-stop recording when background time expires
+        if isRecording && recordingDuration >= maxBackgroundDuration {
+            _ = stopRecording()
+        }
+        endBackgroundTask()
+    }
+
+    private func startDurationTimer() {
+        durationTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self = self, let start = self.sessionStartTime else { return }
+            self.recordingDuration = Date().timeIntervalSince(start)
+
+            // Auto-stop if background duration exceeded
+            if self.recordingDuration >= self.maxBackgroundDuration {
+                _ = self.stopRecording()
+            }
+        }
+    }
+}
+```
+
+### 12.3 SessionStorage
+
+Manages persistence of recording sessions to local storage.
+
+```swift
+import Foundation
+
+class SessionStorage: ObservableObject {
+    private let sessionsDirectory: URL
+    private let metadataFile: URL
+
+    @Published private(set) var sessions: [SessionMetadata] = []
+
+    init() {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        sessionsDirectory = documentsPath.appendingPathComponent("EMFSessions", isDirectory: true)
+        metadataFile = sessionsDirectory.appendingPathComponent("metadata.json")
+
+        createDirectoryIfNeeded()
+        loadMetadata()
+    }
+
+    // MARK: - Public API
+
+    func save(_ session: RecordingSession) throws {
+        // Save full session data
+        let sessionFile = sessionsDirectory.appendingPathComponent("\(session.id.uuidString).json")
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(session)
+        try data.write(to: sessionFile)
+
+        // Update metadata list
+        let metadata = SessionMetadata(
+            id: session.id,
+            name: session.name,
+            startTime: session.startTime,
+            endTime: session.endTime ?? Date(),
+            duration: session.duration,
+            readingCount: session.readings.count,
+            minMagnitude: session.statistics.minMagnitude,
+            maxMagnitude: session.statistics.maxMagnitude,
+            avgMagnitude: session.statistics.avgMagnitude
+        )
+        sessions.insert(metadata, at: 0)
+        saveMetadata()
+    }
+
+    func load(sessionId: UUID) throws -> RecordingSession {
+        let sessionFile = sessionsDirectory.appendingPathComponent("\(sessionId.uuidString).json")
+        let data = try Data(contentsOf: sessionFile)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(RecordingSession.self, from: data)
+    }
+
+    func delete(sessionId: UUID) throws {
+        let sessionFile = sessionsDirectory.appendingPathComponent("\(sessionId.uuidString).json")
+        try FileManager.default.removeItem(at: sessionFile)
+        sessions.removeAll { $0.id == sessionId }
+        saveMetadata()
+    }
+
+    func deleteAll() throws {
+        for session in sessions {
+            let sessionFile = sessionsDirectory.appendingPathComponent("\(session.id.uuidString).json")
+            try? FileManager.default.removeItem(at: sessionFile)
+        }
+        sessions.removeAll()
+        saveMetadata()
+    }
+
+    func updateMetadata(sessionId: UUID, name: String?, notes: String?) throws {
+        // Load, update, and save session
+        var session = try load(sessionId: sessionId)
+        session.name = name
+        session.notes = notes
+        try save(session)
+    }
+
+    // MARK: - Private
+
+    private func createDirectoryIfNeeded() {
+        try? FileManager.default.createDirectory(at: sessionsDirectory, withIntermediateDirectories: true)
+    }
+
+    private func loadMetadata() {
+        guard let data = try? Data(contentsOf: metadataFile) else { return }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        sessions = (try? decoder.decode([SessionMetadata].self, from: data)) ?? []
+    }
+
+    private func saveMetadata() {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        guard let data = try? encoder.encode(sessions) else { return }
+        try? data.write(to: metadataFile)
+    }
+}
+```
+
+### 12.4 StoreKitManager
+
+Handles in-app purchases using StoreKit 2.
+
+```swift
+import StoreKit
+
+@MainActor
+class StoreKitManager: ObservableObject {
+    static let proProductId = "com.emfmeter.pro"
+
+    @Published private(set) var isProUnlocked: Bool = false
+    @Published private(set) var proProduct: Product?
+    @Published private(set) var purchaseState: PurchaseState = .idle
+
+    enum PurchaseState {
+        case idle
+        case purchasing
+        case purchased
+        case failed(Error)
+    }
+
+    private var updateListenerTask: Task<Void, Error>?
+
+    init() {
+        updateListenerTask = listenForTransactions()
+        Task {
+            await loadProducts()
+            await updatePurchaseStatus()
+        }
+    }
+
+    deinit {
+        updateListenerTask?.cancel()
+    }
+
+    // MARK: - Public API
+
+    func purchase() async throws {
+        guard let product = proProduct else { return }
+
+        purchaseState = .purchasing
+
+        let result = try await product.purchase()
+
+        switch result {
+        case .success(let verification):
+            let transaction = try checkVerified(verification)
+            await transaction.finish()
+            isProUnlocked = true
+            purchaseState = .purchased
+
+        case .userCancelled:
+            purchaseState = .idle
+
+        case .pending:
+            purchaseState = .idle
+
+        @unknown default:
+            purchaseState = .idle
+        }
+    }
+
+    func restorePurchases() async {
+        await updatePurchaseStatus()
+    }
+
+    // MARK: - Private
+
+    private func loadProducts() async {
+        do {
+            let products = try await Product.products(for: [Self.proProductId])
+            proProduct = products.first
+        } catch {
+            print("Failed to load products: \(error)")
+        }
+    }
+
+    private func updatePurchaseStatus() async {
+        for await result in Transaction.currentEntitlements {
+            if case .verified(let transaction) = result {
+                if transaction.productID == Self.proProductId {
+                    isProUnlocked = true
+                    return
+                }
+            }
+        }
+        isProUnlocked = false
+    }
+
+    private func listenForTransactions() -> Task<Void, Error> {
+        Task.detached {
+            for await result in Transaction.updates {
+                if case .verified(let transaction) = result {
+                    if transaction.productID == Self.proProductId {
+                        await MainActor.run {
+                            self.isProUnlocked = true
+                        }
+                    }
+                    await transaction.finish()
+                }
+            }
+        }
+    }
+
+    private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
+        switch result {
+        case .unverified:
+            throw StoreError.verificationFailed
+        case .verified(let item):
+            return item
+        }
+    }
+}
+
+enum StoreError: Error {
+    case verificationFailed
+}
+```
+
+### 12.5 ExportService
+
+Generates CSV files for session export.
+
+```swift
+import Foundation
+import UniformTypeIdentifiers
+
+class ExportService {
+
+    func generateCSV(from session: RecordingSession, unit: EMFUnit) -> URL? {
+        var csvContent = "Timestamp (s),X (\(unit.symbol)),Y (\(unit.symbol)),Z (\(unit.symbol)),Magnitude (\(unit.symbol))\n"
+
+        for reading in session.readings {
+            let x = UnitConverter.convert(reading.x, from: .microTesla, to: unit)
+            let y = UnitConverter.convert(reading.y, from: .microTesla, to: unit)
+            let z = UnitConverter.convert(reading.z, from: .microTesla, to: unit)
+            let magnitude = UnitConverter.convert(reading.magnitude, from: .microTesla, to: unit)
+
+            csvContent += String(format: "%.3f,%.2f,%.2f,%.2f,%.2f\n",
+                                 reading.timestamp, x, y, z, magnitude)
+        }
+
+        // Create temp file
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd_HHmmss"
+        let filename = "EMF_Session_\(dateFormatter.string(from: session.startTime)).csv"
+
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
+
+        do {
+            try csvContent.write(to: tempURL, atomically: true, encoding: .utf8)
+            return tempURL
+        } catch {
+            print("Failed to write CSV: \(error)")
+            return nil
+        }
+    }
+}
+```
+
+### 12.6 OscilloscopeView
+
+SwiftUI view rendering the vintage CRT-style oscilloscope graph.
+
+```swift
+import SwiftUI
+
+struct OscilloscopeView: View {
+    let readings: [TimestampedReading]
+    let maxValue: Float
+    let visibleDuration: TimeInterval = 30  // 30 seconds visible
+
+    @State private var scrollOffset: CGFloat = 0
+    @GestureState private var dragOffset: CGFloat = 0
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                // CRT Background
+                crtBackground
+
+                // Grid lines (graticule)
+                graticule(in: geometry.size)
+
+                // Waveform
+                waveform(in: geometry.size)
+
+                // Phosphor glow overlay
+                phosphorGlow
+
+                // Scan lines
+                scanLines(in: geometry.size)
+
+                // Bezel frame
+                bezelFrame
+            }
+            .gesture(dragGesture)
+        }
+        .aspectRatio(2.5, contentMode: .fit)
+    }
+
+    // MARK: - CRT Effects
+
+    private var crtBackground: some View {
+        RoundedRectangle(cornerRadius: 8)
+            .fill(
+                RadialGradient(
+                    colors: [Color(hex: "0A2010"), Color(hex: "051008")],
+                    center: .center,
+                    startRadius: 0,
+                    endRadius: 200
+                )
+            )
+    }
+
+    private func graticule(in size: CGSize) -> some View {
+        Canvas { context, size in
+            let gridColor = Color(hex: "1A4020").opacity(0.6)
+
+            // Vertical lines (time divisions)
+            for i in 0...10 {
+                let x = size.width * CGFloat(i) / 10
+                var path = Path()
+                path.move(to: CGPoint(x: x, y: 0))
+                path.addLine(to: CGPoint(x: x, y: size.height))
+                context.stroke(path, with: .color(gridColor), lineWidth: 0.5)
+            }
+
+            // Horizontal lines (magnitude divisions)
+            for i in 0...4 {
+                let y = size.height * CGFloat(i) / 4
+                var path = Path()
+                path.move(to: CGPoint(x: 0, y: y))
+                path.addLine(to: CGPoint(x: size.width, y: y))
+                context.stroke(path, with: .color(gridColor), lineWidth: 0.5)
+            }
+        }
+    }
+
+    private func waveform(in size: CGSize) -> some View {
+        Canvas { context, size in
+            guard readings.count > 1 else { return }
+
+            let totalOffset = scrollOffset + dragOffset
+            let pixelsPerSecond = size.width / visibleDuration
+
+            var path = Path()
+            var firstPoint = true
+
+            for reading in readings {
+                let x = size.width - (reading.timestamp * pixelsPerSecond) + totalOffset
+                guard x >= -10 && x <= size.width + 10 else { continue }
+
+                let normalizedY = CGFloat(reading.magnitude / maxValue).clamped(to: 0...1)
+                let y = size.height * (1 - normalizedY)
+
+                if firstPoint {
+                    path.move(to: CGPoint(x: x, y: y))
+                    firstPoint = false
+                } else {
+                    path.addLine(to: CGPoint(x: x, y: y))
+                }
+            }
+
+            // Phosphor green with glow
+            context.stroke(path, with: .color(Color(hex: "00FF00")), lineWidth: 2)
+        }
+        .blur(radius: 0.5)  // Subtle phosphor blur
+    }
+
+    private var phosphorGlow: some View {
+        RoundedRectangle(cornerRadius: 8)
+            .fill(Color(hex: "00FF00").opacity(0.03))
+            .blur(radius: 20)
+    }
+
+    private func scanLines(in size: CGSize) -> some View {
+        Canvas { context, size in
+            for y in stride(from: 0, to: size.height, by: 2) {
+                var path = Path()
+                path.move(to: CGPoint(x: 0, y: y))
+                path.addLine(to: CGPoint(x: size.width, y: y))
+                context.stroke(path, with: .color(.black.opacity(0.1)), lineWidth: 1)
+            }
+        }
+    }
+
+    private var bezelFrame: some View {
+        RoundedRectangle(cornerRadius: 12)
+            .strokeBorder(
+                LinearGradient(
+                    colors: [Color(hex: "2A2A2A"), Color(hex: "1A1A1A")],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                lineWidth: 6
+            )
+    }
+
+    // MARK: - Gestures
+
+    private var dragGesture: some Gesture {
+        DragGesture()
+            .updating($dragOffset) { value, state, _ in
+                state = value.translation.width
+            }
+            .onEnded { value in
+                scrollOffset += value.translation.width
+                scrollOffset = max(0, scrollOffset)  // Can't scroll past present
+            }
+    }
+}
+
+extension Comparable {
+    func clamped(to range: ClosedRange<Self>) -> Self {
+        min(max(self, range.lowerBound), range.upperBound)
+    }
+}
+```
+
+### 12.7 RecordButtonView
+
+Vintage-styled recording button positioned next to the analog meter.
+
+```swift
+import SwiftUI
+
+struct RecordButtonView: View {
+    @Binding var isRecording: Bool
+    let isProUser: Bool
+    let onTap: () -> Void
+    let onUpgradeNeeded: () -> Void
+
+    @State private var isPressed = false
+
+    var body: some View {
+        Button(action: handleTap) {
+            ZStack {
+                // Button housing (metallic rim)
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color(hex: "4A4A4A"), Color(hex: "2A2A2A")],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 60, height: 60)
+
+                // Inner depression
+                Circle()
+                    .fill(Color(hex: "1A1A1A"))
+                    .frame(width: 50, height: 50)
+                    .offset(y: isPressed ? 2 : 0)
+
+                // Red button surface
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: isRecording
+                                ? [Color(hex: "FF0000"), Color(hex: "AA0000")]
+                                : [Color(hex: "CC0000"), Color(hex: "880000")],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 20
+                        )
+                    )
+                    .frame(width: 44, height: 44)
+                    .offset(y: isPressed ? 2 : 0)
+                    .shadow(color: .black.opacity(0.5), radius: isPressed ? 1 : 3, y: isPressed ? 1 : 2)
+
+                // Recording indicator light
+                if isRecording {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 8, height: 8)
+                        .offset(y: isPressed ? 2 : 0)
+                        .opacity(blinkOpacity)
+                }
+
+                // REC label
+                Text("REC")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white.opacity(0.8))
+                    .offset(y: 32)
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in isPressed = true }
+                .onEnded { _ in isPressed = false }
+        )
+        .accessibilityLabel(isRecording ? "Stop recording" : "Start recording")
+        .accessibilityHint(isProUser ? "" : "Requires Pro upgrade")
+    }
+
+    @State private var blinkOpacity: Double = 1.0
+
+    private func handleTap() {
+        if isProUser {
+            onTap()
+        } else {
+            onUpgradeNeeded()
+        }
+    }
+}
+```
+
+### 12.8 UpgradePromptView
+
+Modal view shown when free users attempt to access Pro features.
+
+```swift
+import SwiftUI
+
+struct UpgradePromptView: View {
+    @ObservedObject var storeManager: StoreKitManager
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(spacing: 24) {
+            // Header
+            VStack(spacing: 8) {
+                Image(systemName: "waveform.badge.plus")
+                    .font(.system(size: 48))
+                    .foregroundColor(.blue)
+
+                Text("Upgrade to Pro")
+                    .font(.title.bold())
+
+                Text("Unlock advanced features")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+
+            // Feature list
+            VStack(alignment: .leading, spacing: 16) {
+                FeatureRow(icon: "record.circle", title: "Session Recording", description: "Record and save EMF readings")
+                FeatureRow(icon: "waveform", title: "Oscilloscope Graph", description: "Real-time vintage CRT display")
+                FeatureRow(icon: "clock.arrow.circlepath", title: "Session History", description: "Browse and manage recordings")
+                FeatureRow(icon: "square.and.arrow.up", title: "CSV Export", description: "Share data for analysis")
+            }
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+
+            Spacer()
+
+            // Price and purchase button
+            VStack(spacing: 12) {
+                if let product = storeManager.proProduct {
+                    Text(product.displayPrice)
+                        .font(.title2.bold())
+
+                    Text("One-time purchase")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Button(action: { Task { try? await storeManager.purchase() } }) {
+                    HStack {
+                        if case .purchasing = storeManager.purchaseState {
+                            ProgressView()
+                                .tint(.white)
+                        } else {
+                            Text("Upgrade to Pro")
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
+                .disabled(storeManager.purchaseState == .purchasing)
+
+                Button("Restore Purchases") {
+                    Task { await storeManager.restorePurchases() }
+                }
+                .font(.footnote)
+                .foregroundColor(.blue)
+            }
+        }
+        .padding()
+        .onChange(of: storeManager.isProUnlocked) { unlocked in
+            if unlocked { dismiss() }
+        }
+    }
+}
+
+struct FeatureRow: View {
+    let icon: String
+    let title: String
+    let description: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundColor(.blue)
+                .frame(width: 32)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.headline)
+                Text(description)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+    }
+}
+```
+
+### 12.9 Updated iOS Project Structure
+
+```
+ios/EMFMeter/Sources/
+├── EMFMeterApp.swift
+├── Models/
+│   ├── EMFModels.swift
+│   ├── RecordingSession.swift          ◆ NEW
+│   └── SessionMetadata.swift            ◆ NEW
+├── ViewModels/
+│   ├── EMFViewModel.swift
+│   ├── RecordingViewModel.swift         ◆ NEW
+│   └── StoreViewModel.swift             ◆ NEW
+├── Views/
+│   ├── MainView.swift
+│   ├── SettingsView.swift
+│   ├── SafetyInfoView.swift
+│   ├── SessionHistoryView.swift         ◆ NEW
+│   ├── SessionDetailView.swift          ◆ NEW
+│   └── UpgradePromptView.swift          ◆ NEW
+├── Components/
+│   ├── AnalogMeterView.swift
+│   ├── OscilloscopeView.swift           ◆ NEW
+│   ├── RecordButtonView.swift           ◆ NEW
+│   ├── ControlPanelView.swift
+│   └── ...
+├── Services/
+│   ├── MagnetometerService.swift
+│   ├── AudioService.swift
+│   ├── RecordingService.swift           ◆ NEW
+│   ├── SessionStorage.swift             ◆ NEW
+│   ├── StoreKitManager.swift            ◆ NEW
+│   └── ExportService.swift              ◆ NEW
+└── Theme/
+    └── Colors.swift
+
+◆ = New in V2.0
+```
+
+### 12.10 StoreKit Configuration
+
+Create `Products.storekit` configuration file for testing:
+
+```xml
+{
+  "products": [
+    {
+      "displayPrice": "2.99",
+      "familyShareable": false,
+      "internalID": "com.emfmeter.pro",
+      "localizations": [
+        {
+          "description": "Unlock recording, oscilloscope, history, and export features",
+          "displayName": "EMF Scope Pro",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.emfmeter.pro",
+      "referenceName": "Pro Upgrade",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {}
+}
+```
+
+### 12.11 Background Recording Configuration
+
+Add to `Info.plist`:
+```xml
+<key>UIBackgroundModes</key>
+<array>
+    <string>processing</string>
+</array>
+<key>BGTaskSchedulerPermittedIdentifiers</key>
+<array>
+    <string>com.emfmeter.recording</string>
+</array>
+```
+
+---
+
+## 13. Future Considerations (V3+)
+
+- iCloud sync for sessions
+- Apple Watch companion app
+- Home screen widgets
+- AR mode showing EMF visualization
+- Map overlay showing readings by location
+- Additional export formats (JSON, PDF reports)
+- Android Pro features parity

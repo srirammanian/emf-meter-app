@@ -42,8 +42,11 @@ class EMFViewModel: ObservableObject {
     @Published var showSettings: Bool = false
     @Published var theme: String = "system"
 
-    // Current processed reading
-    private var currentReading: ProcessedReading?
+    /// Current raw reading (exposed for recording service)
+    @Published private(set) var currentReading: EMFReading?
+
+    // Current processed reading (internal)
+    private var processedReading: ProcessedReading?
 
     /// Initialize with automatic service selection (mock on simulator, real on device).
     /// Also supports UI testing launch arguments for different scenarios.
@@ -132,7 +135,7 @@ class EMFViewModel: ObservableObject {
     }
 
     @objc private func updateNeedle() {
-        guard let reading = currentReading else { return }
+        guard let reading = processedReading else { return }
 
         let newPosition = needlePhysics.update(
             targetPosition: reading.normalizedValue,
@@ -164,7 +167,8 @@ class EMFViewModel: ObservableObject {
         let magnitude = calibrated.magnitude
         let normalized = min(max(magnitude / MeterConfig.maxValueUT, 0), 1)
 
-        currentReading = ProcessedReading(
+        currentReading = calibrated  // Expose calibrated reading for recording/oscilloscope
+        processedReading = ProcessedReading(
             rawReading: reading,
             calibratedReading: calibrated,
             magnitude: magnitude,
@@ -183,7 +187,7 @@ class EMFViewModel: ObservableObject {
 
     func setUnit(_ unit: EMFUnit) {
         selectedUnit = unit
-        if let reading = currentReading {
+        if let reading = processedReading {
             displayValue = UnitConverter.convert(reading.magnitude, from: .microTesla, to: unit)
         }
         UserDefaults.standard.set(unit.rawValue, forKey: EMFViewModelKeys.unit)
@@ -224,6 +228,11 @@ class EMFViewModel: ObservableObject {
     func setTheme(_ theme: String) {
         self.theme = theme
         UserDefaults.standard.set(theme, forKey: EMFViewModelKeys.theme)
+    }
+
+    /// Play the push button sound (for UI feedback on buttons like REC)
+    func playButtonSound() {
+        audioService.playPushButton()
     }
 
     func start() {
